@@ -11,17 +11,21 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
+# Содержит переменные окружения
+env = environ.Env()
+environ.Env.read_env(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-vj@zlkw9n*i&x(%vav4#2yf^&yodetn+p%@#s4bzg)eh7%ka@^"
+SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -76,11 +80,11 @@ WSGI_APPLICATION = "core.project.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": '',
-				"USER": '',
-				"PASSWORD": '',
-				"HOST": '',
-				"PORT": ''
+        "NAME": env('POSTGRES_DB'),
+		"USER": env('POSTGRES_USER'),
+		"PASSWORD": env('POSTGRES_PASSWORD'),
+		"HOST": env('POSTGRES_HOST'),
+		"PORT": env('POSTGRES_PORT')
     }
 }
 
@@ -107,9 +111,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ru"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Moscow"
 
 USE_I18N = True
 
