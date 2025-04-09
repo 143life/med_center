@@ -2,3 +2,6 @@
 *.pyc
 .env
 core\project\settings\local.py
+__pycache__/
+static/*
+!static/.gitkeep
