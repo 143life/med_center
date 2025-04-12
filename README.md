@@ -18,6 +18,21 @@ This is a **Medical Center** web application built with **Django**, using **Dock
 
 2. Install all required packages in 'Requirements' section
 
+3. Create in base dir file .env:
+   ```bash
+   DJANGO_SECRET_KEY=my_secretkey
+   DJANGO_PORT=my_port
+   POSTGRES_DB=my_db
+   POSTGRES_USER=my_user
+   POSTGRES_PASSWORD=my_password
+   POSTGRES_PORT=my_psql_port
+   POSTGRES_HOST=my_service
+
+4. (for Windows) - In docker_compose/app.yaml change:
+   ```bash
+   #command: "sh /entrypoint.sh"
+   command: "python manage.py runserver 0.0.0.0:8000"
+
 ### Implemented Commands
 
 * 'make app' - up application and db infrastructure
