@@ -26,7 +26,5 @@ wait_for_port() {
 # Ожидание доступности порта PostgreSQL
 wait_for_port "postgres" 5432
 
-#
-echo "HELPPPPPPPPPPP"
 # Запуск Django-приложения
 python manage.py runserver 0.0.0.0:8000

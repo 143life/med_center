@@ -4,17 +4,9 @@ This is a **Medical Center** web application built with **Django**, using **Dock
 
 ## Requirements
 
-- **Docker**: Use Docker to build and run the containers.
-- **Docker Compose**: Tool for managing multi-container Docker applications.
-- **Make**: A tool to automate tasks.
-- **Python 3.x** and **Django**.
-
-## Requirements
-
 - **[Docker](https://www.docker.com/)**: A platform used for building, running, and shipping applications inside containers.
 - **[Docker Compose](https://docs.docker.com/compose/)**: A tool for defining and running multi-container Docker applications.
 - **[Make](https://www.gnu.org/software/make/)**: A build automation tool that helps automate tasks like starting services, building code, or running tests.
-
 
 ## Installation and Setup
 
@@ -37,7 +29,8 @@ This is a **Medical Center** web application built with **Django**, using **Dock
 
 ### Most Used Django Specific Commands
 
+* 'make collectstatic' - collect static
 * 'make migrations' - make migrations to models
 * 'make migrate' - apply all made migrations
-* 'make collectstatic' - collect static
+* 'make showmigrations' - show all migrations
 * 'make superuser' - create admin user

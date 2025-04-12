@@ -37,8 +37,7 @@ app-logs:
 
 .PHONY: app-down
 app-down:
-	${DC} -f ${APP_FILE} -f ${STORAGES_FILE} down -v
-
+	${DC} -f ${APP_FILE} -f ${STORAGES_FILE} down
 .PHONY: app-in
 app-in:
 	${EXEC} ${APP_CONTAINER} ash
@@ -50,6 +49,10 @@ migrate:
 .PHONY: migrations
 migrations:
 	${EXEC} ${APP_CONTAINER} ${MANAGE_PY} makemigrations
+
+.PHONY: showmigrations
+showmigrations:
+	${EXEC} ${APP_CONTAINER} ${MANAGE_PY} showmigrations
 
 .PHONY: superuser
 superuser:

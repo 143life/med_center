@@ -31,6 +31,7 @@ RUN poetry install --no-root --no-interaction --no-ansi
 # Скопировать директорию . в WORKDIR директорию
 COPY . /app/
 
+# Скрипт, помогающий установить связь с БД и запустить сервер
 COPY entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
