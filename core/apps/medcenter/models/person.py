@@ -27,3 +27,4 @@ class Person(TimedBaseModel):
     class Meta:
         verbose_name = 'Человек'
         verbose_name_plural = 'Люди'
+        ordering = ['last_name']

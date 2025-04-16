@@ -2,11 +2,34 @@ from django.contrib import admin
 from .models import Appointment, DoctorSchedule, Doctor, Person, Schedule, Specialization, Ticket, WaitingList
 
 # Register your models here.
-admin.site.register(Appointment)
-admin.site.register(DoctorSchedule)
-admin.site.register(Doctor)
-admin.site.register(Person)
-admin.site.register(Schedule)
-admin.site.register(Specialization)
-admin.site.register(Ticket)
-admin.site.register(WaitingList)
+@admin.register(Appointment)
+class AppointnmentAdmin(admin.ModelAdmin):
+    list_display = ('ticket', 'specialization')
+
+@admin.register(DoctorSchedule)
+class DoctorScheduleAdmin(admin.ModelAdmin):
+    list_display = ('cabinet_number', 'doctor', 'schedule')
+
+@admin.register(Doctor)
+class DoctorAdmin(admin.ModelAdmin):
+    list_display = ('person', 'specialization')
+
+@admin.register(Person)
+class PersonAdmin(admin.ModelAdmin):
+    list_display = ('first_name', 'last_name')
+
+@admin.register(Schedule)
+class ScheduleAdmin(admin.ModelAdmin):
+    list_display = ('datetime_begin', 'datetime_end')
+
+@admin.register(Specialization)
+class SpecializationAdmin(admin.ModelAdmin):
+    ...
+
+@admin.register(Ticket)
+class TicketAdmin(admin.ModelAdmin):
+    list_display = ('person', 'datetime', 'number', 'completed')
+
+@admin.register(WaitingList)
+class WaitingListAdmin(admin.ModelAdmin):
+    list_display = ('ticket', 'time_begin', 'time_end')
