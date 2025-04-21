@@ -13,7 +13,8 @@ api = NinjaAPI()
 def ping(request: HttpRequest) -> PingResponseSchema:
     return PingResponseSchema(result=True)
 
-api.add_router('v1', v1_router)
+
+api.add_router("v1", v1_router)
 
 urlpatterns = [
     path("", api.urls),
