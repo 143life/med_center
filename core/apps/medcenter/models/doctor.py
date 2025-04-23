@@ -1,12 +1,28 @@
 from django.db import models
+
 from core.apps.common.models import TimedBaseModel
+from core.apps.medcenter.entities import Doctor as DoctorEntity
+
 from .person import Person
 from .specialization import Specialization
 
 
 class Doctor(TimedBaseModel):
-    person = models.OneToOneField(Person, on_delete=models.CASCADE, primary_key=True)
-    specialization = models.ForeignKey(Specialization, on_delete=models.CASCADE)
+    person = models.OneToOneField(
+        Person,
+        on_delete=models.CASCADE,
+        primary_key=True,
+    )
+    specialization = models.ForeignKey(
+        Specialization,
+        on_delete=models.CASCADE,
+    )
+
+    def to_entity(self):
+        return DoctorEntity(
+            person=self.person,
+            specialization=self.specialization,
+        )
 
     def __str__(self):
         return f"{self.person}, {self.specialization}"

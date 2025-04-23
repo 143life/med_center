@@ -1,5 +1,7 @@
 from django.db import models
+
 from core.apps.common.models import TimedBaseModel
+
 from .doctor import Doctor
 from .schedule import Schedule
 
@@ -17,7 +19,7 @@ class DoctorSchedule(TimedBaseModel):
             models.UniqueConstraint(
                 fields=["doctor", "schedule", "cabinet_number"],
                 name="unique_doctor_schedule_cabnumber",
-            )
+            ),
         ]
         verbose_name = "Расписание работы"
         verbose_name_plural = "Расписания работы"

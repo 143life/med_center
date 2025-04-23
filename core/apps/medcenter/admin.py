@@ -1,8 +1,9 @@
 from django.contrib import admin
+
 from .models import (
     Appointment,
-    DoctorSchedule,
     Doctor,
+    DoctorSchedule,
     Person,
     Schedule,
     Specialization,
@@ -38,7 +39,7 @@ class ScheduleAdmin(admin.ModelAdmin):
 
 
 @admin.register(Specialization)
-class SpecializationAdmin(admin.ModelAdmin): ...
+class SpecializationAdmin(admin.ModelAdmin): ...  # noqa
 
 
 @admin.register(Ticket)

@@ -1,11 +1,12 @@
 from datetime import datetime
+
 from pydantic import BaseModel
 
 from core.apps.medcenter.entities.person import Person as PersonEntity
 
 
 class PersonSchema(BaseModel):
-    id: int
+    id: int  # noqa
     first_name: str
     last_name: str
     patronymic: str

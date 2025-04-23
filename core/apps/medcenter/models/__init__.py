@@ -1,8 +1,8 @@
-from .appointment import Appointment
-from .doctor import Doctor
-from .schedule import Schedule
-from .doctor_schedule import DoctorSchedule
-from .person import Person  # no qa
-from .specialization import Specialization  # no qa
-from .ticket import Ticket
-from .waiting_list import WaitingList
+from .appointment import Appointment  # noqa
+from .doctor import Doctor  # noqa
+from .doctor_schedule import DoctorSchedule  # noqa
+from .person import Person  # noqa
+from .schedule import Schedule  # noqa
+from .specialization import Specialization  # noqa
+from .ticket import Ticket  # noqa
+from .waiting_list import WaitingList  # noqa

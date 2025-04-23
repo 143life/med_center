@@ -1,5 +1,7 @@
 from django.db import models
+
 from core.apps.common.models import TimedBaseModel
+
 from .person import Person
 
 

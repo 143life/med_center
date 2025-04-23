@@ -6,6 +6,7 @@ from ninja import NinjaAPI
 from core.api.schemas import PingResponseSchema
 from core.api.v1.urls import router as v1_router
 
+
 api = NinjaAPI()
 
 

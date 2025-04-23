@@ -9,7 +9,7 @@ class Person:
     from different sources
     """
 
-    id: int
+    id: int  # noqa
     first_name: str
     last_name: str
     patronymic: str

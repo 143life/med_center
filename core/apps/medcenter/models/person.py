@@ -1,4 +1,5 @@
 from django.db import models
+
 from core.apps.common.models import TimedBaseModel
 from core.apps.medcenter.entities import Person as PersonEntity
 
@@ -12,15 +13,14 @@ class Person(TimedBaseModel):
     last_name = models.CharField("Фамилия", max_length=25)
     patronymic = models.CharField("Отчество", max_length=25)
     date_birth = models.DateField("Дата рождения")
-    # is_visible = models.BooleanField('Виден ли в списке', default=True)
+    # noqa is_visible = models.BooleanField('Виден ли в списке', default=True)
 
     def to_entity(self) -> PersonEntity:
         """
         Method that create entity object (from ../entities/person.py)
         """
         return PersonEntity(
-            # id=self.pk
-            id=self.id,
+            id=self.id,  # id=self.pk
             first_name=self.first_name,
             last_name=self.last_name,
             patronymic=self.patronymic,

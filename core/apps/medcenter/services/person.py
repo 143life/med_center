@@ -1,5 +1,8 @@
-from abc import ABC, abstractmethod
-from typing import Iterable
+from abc import (
+    ABC,
+    abstractmethod,
+)
+from collections.abc import Iterable
 
 from django.db.models import Q
 
@@ -14,7 +17,9 @@ class BasePersonService(ABC):
 
     @abstractmethod
     def get_person_list(
-        self, filters: PersonFilters, pagination: PaginationIn
+        self,
+        filters: PersonFilters,
+        pagination: PaginationIn,
     ) -> Iterable[Person]: ...
     @abstractmethod
     def get_person_count(self, filters: PersonFilters) -> int: ...
@@ -35,11 +40,13 @@ class ORMPersonService(BasePersonService):
         return query
 
     def get_person_list(
-        self, filters: PersonFilters, pagination: PaginationIn
+        self,
+        filters: PersonFilters,
+        pagination: PaginationIn,
     ) -> Iterable[Person]:
         query = self._build_product_query(filters)
         qs = PersonDTO.objects.filter(query)[
-            pagination.offset : pagination.offset + pagination.limit
+            pagination.offset : pagination.offset + pagination.limit  # noqa
         ]  # maybe is_visible=True later
 
         return [person.to_entity() for person in qs]
@@ -48,5 +55,5 @@ class ORMPersonService(BasePersonService):
         query = self._build_product_query(filters)
 
         return PersonDTO.objects.filter(
-            query
+            query,
         ).count()  # maybe is_visible=True later (in filter)
