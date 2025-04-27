@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.admin import AdminSite
 
 from .models import (
     Appointment,
@@ -10,6 +11,26 @@ from .models import (
     Ticket,
     WaitingList,
 )
+
+
+class MyAdminSite(AdminSite):
+    site_header = "Название сайта"  # Название вверху страницы админки
+    site_title = "Админка сайта"  # Название вкладки браузера
+    index_title = "Добро пожаловать!"  # Название на главной админке
+
+    def each_context(self, request):
+        context = super().each_context(request)
+        context["site_title"] = self.site_title
+        return context
+
+
+class CustomAdmin(admin.ModelAdmin):
+    class Media:
+        css = {"all": ("admin/custom/custom.css",)}
+
+
+# Создаем свой экземпляр админки
+admin_site = MyAdminSite(name="myadmin")
 
 
 # Register your models here.
@@ -31,6 +52,8 @@ class DoctorAdmin(admin.ModelAdmin):
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
     list_display = ("first_name", "last_name")
+    search_fields = ["first_name", "last_name", "patronymic", "date_birth"]
+    list_filter = ["last_name"]
 
 
 @admin.register(Schedule)

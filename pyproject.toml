@@ -11,7 +11,8 @@ dependencies = [
     "django (>=5.2,<6.0)",
     "psycopg2 (>=2.9.10,<3.0.0)",
     "django-environ (>=0.12.0,<0.13.0)",
-    "django-ninja (>=1.4.1,<2.0.0)"
+    "django-ninja (>=1.4.1,<2.0.0)",
+    "django-cors-headers (>=4.7.0,<5.0.0)"
 ]
 
 
@@ -22,6 +23,9 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.group.dev.dependencies]
 isort = "^6.0.1"
 pre-commit = "^4.2.0"
+faker = "^37.1.0"
+pytest = "^8.3.5"
+pytest-django = "^4.11.1"
 
 [tool.isort]
 # Global

@@ -57,3 +57,10 @@ class ORMPersonService(BasePersonService):
         return PersonDTO.objects.filter(
             query,
         ).count()  # maybe is_visible=True later (in filter)
+
+    def get_person_by_id(self, person_id: int) -> Person:
+        try:
+            person = PersonDTO.objects.get(id=person_id)
+            return person.to_entity()
+        except PersonDTO.DoesNotExist:
+            return None

@@ -20,6 +20,7 @@ from core.api.v1.medcenter.filters import (
 )
 from core.api.v1.medcenter.schemas.doctor import DoctorSchema
 from core.api.v1.medcenter.schemas.specialization import SpecializationSchema
+from core.api.v1.medcenter.views.account import router as account_router
 from core.apps.medcenter.services.doctor import (
     BaseDoctorService,
     ORMDoctorService,
@@ -37,6 +38,7 @@ from .schemas.person import PersonSchema
 
 
 router = Router(tags=["medcenter"])
+router.add_router("account", account_router)
 
 
 @router.get(

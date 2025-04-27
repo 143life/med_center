@@ -1,0 +1,38 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/custom.css' %}">
+{% endblock %}
+
+{% block branding %}
+<div id="branding">
+    <nav>
+        <ul>
+            <li><a href="/info">Об учреждении</a></li>
+            <li><a href="/queue">Очередь</a></li>
+            <li><a href="/account">Аккаунт</a></li>
+            <li><a href="/admin">Административная панель</a></li>
+        </ul>
+    </nav>
+    <h1>Название ВУЗа</h1>
+</div>
+<div class="auth-links">
+    <a href="/register">Регистрация</a> / <a href="/login">Вход</a>
+</div>
+{% endblock %}
+
+{% block usertools %}{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block footer %}
+<div id="footer">
+    <ul>
+        <li><a href="/link1">Ссылка 1</a></li>
+        <li><a href="/link2">Ссылка 2</a></li>
+        <li><a href="/link3">Ссылка 3</a></li>
+    </ul>
+    <p>Способы связи: email@example.com, +7 (XXX) XXX-XX-XX</p>
+</div>
+{% endblock %}
