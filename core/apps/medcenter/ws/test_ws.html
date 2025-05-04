@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+    <!-- Отключаем CSP для этого файла -->
+    <meta http-equiv="Content-Security-Policy" content="default-src *; connect-src * ws://localhost:8000 ws://127.0.0.1:8000; script-src 'unsafe-inline'">
+</head>
+<body>
+    <script>
+        const socket = new WebSocket('ws://localhost:8000/ws/chat/');
+        socket.onopen = () => {
+            console.log("Connected!");
+            alert("WebSocket подключён!");  // Проверка в браузере
+        };
+        socket.onerror = (e) => {
+            console.error("Error:", e);
+            alert("Ошибка: " + e.message);
+        };
+				socket.onmessage = (e) => {
+					console.log("Ответ");
+					alert ("ОТВЕТ!!!!!!!");
+				};
+    </script>
+</body>
+</html>

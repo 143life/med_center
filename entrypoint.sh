@@ -27,4 +27,6 @@ wait_for_port() {
 wait_for_port "postgres" 5432
 
 # Запуск Django-приложения
-python manage.py runserver 0.0.0.0:8000
+#python manage.py runserver 0.0.0.0:8000
+
+daphne core.project.asgi:application --bind 0.0.0.0 --port 8000 --verbosity 2
