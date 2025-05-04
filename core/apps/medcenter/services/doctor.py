@@ -17,7 +17,6 @@ class ORMDoctorService(BaseService[DoctorFilters, Doctor, DoctorDTO]):
     @classmethod
     def _build_query(cls, filters: DoctorFilters) -> Q:
         query = Q()
-
         return query
 
     def get_doctor_list(
