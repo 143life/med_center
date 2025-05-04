@@ -38,6 +38,7 @@ ALLOWED_HOSTS = ["127.0.0.1"]
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -46,6 +47,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # first party
     "core.apps.medcenter",
+    # third party
+    "channels",
 ]
 
 MIDDLEWARE = [
@@ -76,7 +79,11 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "core.project.wsgi.application"
+ASGI_APPLICATION = "core.project.asgi.application"
 
+CHANNELS_LAYERS = {
+    "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Chat</title>
+</head>
+<body>
+    <script>
+        const socket = new WebSocket('ws://localhost:8000/ws/chat/');
+        
+        socket.onopen = () => {
+            console.log("Connected!");
+            socket.send("Привет, сервер!");
+        };
+
+        socket.onmessage = (e) => {
+            console.log("Ответ сервера:", e.data);
+            alert(e.data);  // Показываем ответ
+        };
+    </script>
+</body>
+</html>
