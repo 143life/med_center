@@ -1,6 +1,7 @@
 from django.db import models
 
 from core.apps.common.models import TimedBaseModel
+from core.apps.medcenter.entities import Appointment as AppointmentEntity
 
 from .specialization import Specialization
 from .ticket import Ticket
@@ -13,6 +14,21 @@ class Appointment(TimedBaseModel):
         on_delete=models.CASCADE,
     )
     completed = models.BooleanField("Завершен", default=False)
+
+    def to_entity(self) -> AppointmentEntity:
+        return AppointmentEntity(
+            ticket=self.ticket.to_entity(),
+            specialization=self.specialization.to_entity(),
+            completed=self.completed,
+        )
+
+    @staticmethod
+    def from_entity(entity: AppointmentEntity) -> "Appointment":
+        return Appointment(
+            ticket=Ticket.from_entity(entity.ticket),
+            specialization=Specialization.from_entity(entity.specialization),
+            completed=entity.completed,
+        )
 
     def __str__(self):
         return f"{self.ticket}, {self.specialization}"

@@ -12,6 +12,10 @@ class Specialization(TimedBaseModel):
             title=self.title,
         )
 
+    @staticmethod
+    def from_entity(entity: SpecializationEntity) -> "Specialization":
+        return Specialization(title=entity.title)
+
     def __str__(self):
         return f"{self.title}"
 

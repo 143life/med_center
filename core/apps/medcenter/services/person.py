@@ -1,8 +1,5 @@
-from collections.abc import Iterable
-
 from django.db.models import Q
 
-from core.api.filters import PaginationIn
 from core.api.v1.medcenter.filters import PersonFilters
 from core.apps.medcenter.entities.person import Person
 from core.apps.medcenter.models.person import Person as PersonDTO
@@ -27,16 +24,3 @@ class ORMPersonService(BaseService[PersonFilters, Person, PersonDTO]):
                 | Q(date_birth__icontains=filters.search)
             )
         return query
-
-    def get_person_list(
-        self,
-        filters: PersonFilters,
-        pagination: PaginationIn,
-    ) -> Iterable[Person]:
-        return ORMPersonService.get_list(
-            filters=filters,
-            pagination=pagination,
-        )
-
-    def get_person_count(self, filters: PersonFilters) -> int:
-        return ORMPersonService.get_count(filters=filters)

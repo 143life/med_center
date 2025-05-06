@@ -1,8 +1,5 @@
-from collections.abc import Iterable
-
 from django.db.models import Q
 
-from core.api.filters import PaginationIn
 from core.api.v1.medcenter.filters import ScheduleFilters
 from core.apps.medcenter.entities import Schedule
 from core.apps.medcenter.models import Schedule as ScheduleDTO
@@ -19,16 +16,3 @@ class ORMScheduleService(BaseService[ScheduleFilters, Schedule, ScheduleDTO]):
         query = Q()
 
         return query
-
-    def get_schedule_list(
-        self,
-        filters: ScheduleFilters,
-        pagination: PaginationIn,
-    ) -> Iterable[Schedule]:
-        return ORMScheduleService.get_list(
-            filters=filters,
-            pagination=pagination,
-        )
-
-    def get_schedule_count(self, filters: ScheduleFilters) -> int:
-        return ORMScheduleService.get_count(filters=filters)

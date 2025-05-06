@@ -27,6 +27,16 @@ class Person(TimedBaseModel):
             date_birth=self.date_birth,
         )
 
+    @staticmethod
+    def from_entity(entity: PersonEntity) -> "Person":
+        return Person(
+            id=entity.id,  # id=self.pk
+            first_name=entity.first_name,
+            last_name=entity.last_name,
+            patronymic=entity.patronymic,
+            date_birth=entity.date_birth,
+        )
+
     def __str__(self):
         return f"{self.last_name} {self.first_name} {self.patronymic}"
 

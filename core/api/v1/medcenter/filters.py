@@ -23,6 +23,7 @@ class TicketFilters(Schema):
 
 class AppointmentFilters(Schema):
     search: str | None = None
+    ticket: int | None = None
 
 
 class ScheduleFilters(Schema):

@@ -1,13 +1,15 @@
-from collections.abc import Iterable
-
 from django.db.models import Q
 
-from core.api.filters import PaginationIn
 from core.api.v1.medcenter.filters import AppointmentFilters
 from core.apps.medcenter.entities.appointment import Appointment
+from core.apps.medcenter.entities.ticket import Ticket
 from core.apps.medcenter.models.appointment import (
     Appointment as AppointmentDTO,
 )
+from core.apps.medcenter.models.specialization import (
+    Specialization as SpecializationDTO,
+)
+from core.apps.medcenter.models.ticket import Ticket as TicketDTO
 from core.apps.medcenter.services.base import BaseService
 
 
@@ -24,14 +26,17 @@ class ORMAppointmentService(
 
         return query
 
-    def get_appointment_list(
-        filters: AppointmentFilters,
-        pagination: PaginationIn,
-    ) -> Iterable[Appointment]:
-        return ORMAppointmentService.get_list(
-            filters=filters,
-            pagination=pagination,
+    @classmethod
+    def create_appointment(
+        cls,
+        ticket: Ticket,
+        specialization_id: int,
+        completed: bool,
+    ) -> Appointment:
+        appointment_dto = AppointmentDTO.objects.create(
+            ticket=TicketDTO.from_entity(ticket),
+            specialization=SpecializationDTO.objects.get(id=specialization_id),
+            completed=completed,
         )
 
-    def get_appointment_count(filters: AppointmentFilters) -> int:
-        return ORMAppointmentService.get_count(filters=filters)
+        return appointment_dto.to_entity()

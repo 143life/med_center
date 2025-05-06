@@ -12,6 +12,10 @@ from core.api.schemas import (
 )
 from core.api.v1.medcenter.filters import TicketFilters
 from core.api.v1.medcenter.handlers.base import BaseHandler
+from core.api.v1.medcenter.schemas.appointment import AppointmentSchema
+from core.api.v1.medcenter.schemas.person import PersonSchema
+from core.api.v1.medcenter.schemas.request import TicketCreateRequest
+from core.api.v1.medcenter.schemas.response import TicketOut
 from core.api.v1.medcenter.schemas.ticket import TicketSchema
 from core.apps.medcenter.services.ticket import ORMTicketService
 
@@ -40,3 +44,39 @@ class TicketHandler(
             filters=filters,
             pagination_in=pagination_in,
         )
+
+    @router.post("/create", response=ApiResponse[TicketOut])
+    def create_ticket_handler(
+        request: HttpRequest,
+        payload: TicketCreateRequest,
+    ) -> ApiResponse[TicketOut]:
+        service = ORMTicketService
+        ticket = TicketSchema(
+            person=PersonSchema(
+                id=payload.id,
+                first_name=payload.first_name,
+                last_name=payload.last_name,
+                patronymic=payload.patronymic,
+                date_birth=payload.date_birth,
+            ),
+            datetime=payload.datetime,
+            number=payload.number,
+            completed=payload.completed,
+        )
+        ticket, appointments = service.create_ticket_with_appointments(
+            ticket=TicketSchema.to_entity(ticket),
+            appointment_list=payload.appointment_list,
+        )
+
+        appointment_out_list = [
+            AppointmentSchema.from_entity(appointment).to_appointment_out()
+            for appointment in appointments
+        ]
+        ticket_schema = TicketSchema.from_entity(ticket)
+
+        ticket_out = TicketOut.from_ticket_and_appointment_out(
+            ticket=ticket_schema,
+            appointment_out_list=appointment_out_list,
+        )
+
+        return ApiResponse(data=ticket_out)

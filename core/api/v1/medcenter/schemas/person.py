@@ -22,5 +22,15 @@ class PersonSchema(BaseModel):
             date_birth=entity.date_birth,
         )
 
+    @staticmethod
+    def to_entity(schema: "PersonSchema") -> PersonEntity:
+        return PersonEntity(
+            id=schema.id,
+            first_name=schema.first_name,
+            last_name=schema.last_name,
+            patronymic=schema.patronymic,
+            date_birth=schema.date_birth,
+        )
+
 
 PersonListSchema = list[PersonSchema]
