@@ -13,3 +13,5 @@ ALLOWED_HOSTS = [
 CSP_CONNECT_SRC = ["'self'", "ws://127.0.0.1:8000"]
 
 SECURE_CONTENT_SECURITY_POLICY = "connect-src 'self' ws://127.0.0.1:8000;"
+
+API_BASE_URL = "http://127.0.0.1:8000/api/v1/"

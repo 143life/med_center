@@ -80,7 +80,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.project.wsgi.application"
 ASGI_APPLICATION = "core.project.asgi.application"
-ASGI_APPLICATION = "core.project.asgi.application"
 
 CHANNELS_LAYERS = {
     "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},

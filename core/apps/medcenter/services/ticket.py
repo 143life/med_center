@@ -39,8 +39,8 @@ class ORMTicketService(BaseService[TicketFilters, Ticket, TicketDTO]):
         appointment_list_response = [
             ORMAppointmentService.create_appointment(
                 ticket=ticket_entity,
-                specialization_id=item["specialization_id"],
-                completed=item["completed"],
+                specialization_id=item,
+                completed=False,
             )
             for item in appointment_list
         ]

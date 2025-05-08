@@ -46,3 +46,12 @@ class SpecializationHandler(
             filters=filters,
             pagination_in=pagination_in,
         )
+
+    @router.get("/all", response=ApiResponse[list[SpecializationSchema]])
+    def get_specialization_all_handler(request: HttpRequest):
+        return ApiResponse(
+            data=[
+                SpecializationSchema.from_entity(obj)
+                for obj in ORMSpecializationService.get_specialization_list()
+            ],
+        )

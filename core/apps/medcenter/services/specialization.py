@@ -1,3 +1,5 @@
+from collections.abc import Iterable
+
 from django.db.models import Q
 
 from core.api.v1.medcenter.filters import SpecializationFilters
@@ -18,3 +20,9 @@ class ORMSpecializationService(
         query = Q()
 
         return query
+
+    @classmethod
+    def get_specialization_list(cls) -> Iterable[Specialization]:
+        qs = cls.model.objects.all()
+
+        return [dto.to_entity() for dto in qs]

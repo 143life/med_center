@@ -9,12 +9,13 @@ class Specialization(TimedBaseModel):
 
     def to_entity(self):
         return SpecializationEntity(
+            id=self.id,
             title=self.title,
         )
 
     @staticmethod
     def from_entity(entity: SpecializationEntity) -> "Specialization":
-        return Specialization(title=entity.title)
+        return Specialization(id=entity.id, title=entity.title)
 
     def __str__(self):
         return f"{self.title}"

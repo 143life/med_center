@@ -2,14 +2,12 @@ from datetime import datetime
 
 from ninja import Schema
 
+from core.api.v1.medcenter.schemas.person import PersonSchema
+
 
 class TicketCreateRequest(Schema):
-    id: int  # noqa
-    first_name: str
-    last_name: str
-    patronymic: str
-    date_birth: datetime | None = None
+    person: "PersonSchema"
     datetime: datetime
     number: int
     completed: bool
-    appointment_list: list[dict]
+    appointment_list: list[int]

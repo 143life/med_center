@@ -7,6 +7,7 @@ from pydantic import (
 )
 
 from core.api.v1.medcenter.schemas.person import PersonSchema
+from core.api.v1.medcenter.schemas.request import TicketCreateRequest
 from core.apps.medcenter.entities.ticket import Ticket as TicketEntity
 
 
@@ -34,6 +35,17 @@ class TicketSchema(BaseModel):
         return TicketEntity(
             id=schema.id,
             person=PersonSchema.to_entity(schema.person),
+            datetime=schema.datetime,
+            number=schema.number,
+            completed=schema.completed,
+        )
+
+    @staticmethod
+    def from_ticket_create_request(
+        schema: TicketCreateRequest,
+    ) -> "TicketSchema":
+        return TicketSchema(
+            person=schema.person,
             datetime=schema.datetime,
             number=schema.number,
             completed=schema.completed,

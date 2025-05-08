@@ -6,12 +6,13 @@ from core.apps.medcenter.entities.specialization import (
 
 
 class SpecializationSchema(BaseModel):
+    id: int  # noqa
     title: str
 
     @staticmethod
     def from_entity(entity: SpecializationEntity) -> "SpecializationSchema":
-        return SpecializationSchema(title=entity.title)
+        return SpecializationSchema(id=entity.id, title=entity.title)
 
     @staticmethod
     def to_entity(schema: "SpecializationSchema") -> SpecializationEntity:
-        return SpecializationEntity(title=schema.title)
+        return SpecializationEntity(id=schema.id, title=schema.title)
