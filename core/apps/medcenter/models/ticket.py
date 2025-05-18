@@ -37,3 +37,4 @@ class Ticket(TimedBaseModel):
     class Meta:
         verbose_name = "Талон"
         verbose_name_plural = "Талоны"
+        app_label = "medcenter"

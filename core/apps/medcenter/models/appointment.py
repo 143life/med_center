@@ -42,3 +42,4 @@ class Appointment(TimedBaseModel):
         ]
         verbose_name = "Приём"
         verbose_name_plural = "Приёмы"
+        app_label = "medcenter"

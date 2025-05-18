@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     "core.apps.medcenter",
     # third party
     "channels",
+    "django_celery_beat",
+    # "django_celery_beat.models.SolarSchedule"
 ]
 
 MIDDLEWARE = [

@@ -4,6 +4,7 @@ from datetime import datetime
 
 @dataclass
 class Schedule:
+    id: int  # noqa
     datetime_begin: datetime
     datetime_end: datetime
     monday: bool

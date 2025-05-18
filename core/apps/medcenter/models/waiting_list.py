@@ -26,3 +26,4 @@ class WaitingList(TimedBaseModel):
     class Meta:
         verbose_name = "Очередь"
         verbose_name_plural = "Очередь"
+        app_label = "medcenter"

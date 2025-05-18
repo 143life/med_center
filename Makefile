@@ -1,5 +1,6 @@
 DC = docker compose
 STORAGES_FILE = docker_compose/storages.yaml
+QUEUE_FILE = docker_compose/queue.yaml
 EXEC = docker exec -it
 DB_CONTAINER = medcenter-db
 APP_CONTAINER = main-app
@@ -27,6 +28,10 @@ postgres:
 app:
 	${DC} -f ${APP_FILE} -f ${STORAGES_FILE} ${ENV} up --build -d
 
+.PHONY: queue
+queue:
+	${DC} -f ${QUEUE_FILE} up --build -d
+
 .PHONY: storages-logs
 storages-logs:
 	${LOGS} ${DB_CONTAINER} -f
@@ -38,6 +43,7 @@ app-logs:
 .PHONY: app-down
 app-down:
 	${DC} -f ${APP_FILE} -f ${STORAGES_FILE} down
+
 .PHONY: app-in
 app-in:
 	${EXEC} ${APP_CONTAINER} ash

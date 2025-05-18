@@ -23,3 +23,4 @@ class DoctorSchedule(TimedBaseModel):
         ]
         verbose_name = "Расписание работы"
         verbose_name_plural = "Расписания работы"
+        app_label = "medcenter"

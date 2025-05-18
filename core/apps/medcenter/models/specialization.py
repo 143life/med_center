@@ -23,3 +23,4 @@ class Specialization(TimedBaseModel):
     class Meta:
         verbose_name = "Специальность"
         verbose_name_plural = "Специальность"
+        app_label = "medcenter"

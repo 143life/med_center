@@ -30,3 +30,4 @@ class Doctor(TimedBaseModel):
     class Meta:
         verbose_name = "Врач"
         verbose_name_plural = "Врачи"
+        app_label = "medcenter"

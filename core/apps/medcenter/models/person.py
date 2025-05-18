@@ -44,3 +44,4 @@ class Person(TimedBaseModel):
         verbose_name = "Человек"
         verbose_name_plural = "Люди"
         ordering = ["last_name"]
+        app_label = "medcenter"

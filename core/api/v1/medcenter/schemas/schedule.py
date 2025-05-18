@@ -6,6 +6,7 @@ from core.apps.medcenter.entities.schedule import Schedule as ScheduleEntity
 
 
 class ScheduleSchema(BaseModel):
+    id: int  # noqa
     datetime_begin: datetime
     datetime_end: datetime
     monday: bool
@@ -19,6 +20,7 @@ class ScheduleSchema(BaseModel):
     @staticmethod
     def from_entity(entity: ScheduleEntity) -> "ScheduleSchema":
         return ScheduleSchema(
+            id=entity.id,
             datetime_begin=entity.datetime_begin,
             datetime_end=entity.datetime_end,
             monday=entity.monday,
