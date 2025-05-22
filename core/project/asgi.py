@@ -10,7 +10,6 @@ https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
 import os
 
 from django.core.asgi import get_asgi_application
-from django.urls import path
 
 from channels.auth import AuthMiddlewareStack
 from channels.routing import (
@@ -18,7 +17,7 @@ from channels.routing import (
     URLRouter,
 )
 
-from core.apps.medcenter.ws.consumers import YourConsumer
+from core.apps.medcenter.ws.routing import websocket_urlpatterns
 
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.project.settings.local")
@@ -27,18 +26,7 @@ django_asgi_app = get_asgi_application()
 
 application = ProtocolTypeRouter(
     {
-        "http": django_asgi_app,
-        "websocket": AuthMiddlewareStack(
-            URLRouter([path("ws/chat/", YourConsumer.as_asgi())]),
-        ),
-    },
-)
-
-application = ProtocolTypeRouter(
-    {
-        "http": django_asgi_app,
-        "websocket": AuthMiddlewareStack(
-            URLRouter([path("ws/chat/", YourConsumer.as_asgi())]),
-        ),
+        "http": get_asgi_application(),
+        "websocket": AuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
     },
 )

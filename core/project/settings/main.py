@@ -39,16 +39,17 @@ ALLOWED_HOSTS = ["127.0.0.1"]
 
 INSTALLED_APPS = [
     "daphne",
+    # third party
+    "channels",
+    # first party
+    "core.apps.medcenter",
+    "core.apps.account",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # first party
-    "core.apps.medcenter",
-    # third party
-    "channels",
     "django_celery_beat",
     # "django_celery_beat.models.SolarSchedule"
 ]
@@ -68,7 +69,7 @@ ROOT_URLCONF = "core.project.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": ["core/templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

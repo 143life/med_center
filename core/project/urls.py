@@ -27,4 +27,6 @@ from django.urls import (
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("core.api.urls")),
+    path("account", include("core.apps.account.urls")),
+    path("", include("core.apps.medcenter.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
