@@ -8,6 +8,7 @@ ALLOWED_HOSTS = [
     "192.168.1.36",  # Windows
     "10.1.30.46",  # Windows
     "192.168.1.42",  # Ubuntu
+    "192.168.1.34"
 ]
 
 CSP_CONNECT_SRC = ["'self'", "ws://127.0.0.1:8000"]

@@ -1,21 +1,6 @@
 version: '3.9'
 
 services:
-  postgres:
-    image: postgres:latest
-    container_name: medcenter-db
-    ports:
-      - "${POSTGRES_PORT}:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    env_file:
-      - ../.env
-
-  redis:
-    image: redis:alpine
-    container_name: medcenter-redis
-    ports:
-      - "6379:6379"
 
   celery-worker:
     image: docker_compose-main-app
@@ -43,7 +28,3 @@ services:
       - DJANGO_SETTINGS_MODULE=core.project.settings.local
     env_file:
       - ../.env
-
-
-volumes:
-  postgres_data:

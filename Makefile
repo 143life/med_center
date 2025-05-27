@@ -11,6 +11,9 @@ DB_USER = my_user
 APP_FILE = docker_compose/app.yaml
 MANAGE_PY = python manage.py
 
+.PHONY: build
+build:
+	${DC} -f ${APP_FILE} ${ENV} build
 
 .PHONY: storages
 storages:
@@ -26,7 +29,7 @@ postgres:
 
 .PHONY: app
 app:
-	${DC} -f ${APP_FILE} -f ${STORAGES_FILE} ${ENV} up --build -d
+	${DC} -f ${STORAGES_FILE} -f ${APP_FILE} ${ENV} up --build -d
 
 .PHONY: queue
 queue:
