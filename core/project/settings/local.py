@@ -1,17 +1,18 @@
 import environ
 
-from .main import *  # noqa
+from .main import BASE_DIR
 
 
 # Содержит переменные окружения
 env = environ.Env()
-environ.Env.read_env(BASE_DIR / ".env.prod")  # noqa
+environ.Env.read_env(BASE_DIR / ".env")  # noqa
 
 DEBUG = True
 
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
+    "0.0.0.0",
     "main-app",  # Имя сервиса в Docker
     "smtu-med.ru",
     "www.smtu-med.ru",
@@ -52,3 +53,25 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+# Настройки кэширования
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "SOCKET_TIMEOUT": 5,
+            "SOCKET_CONNECT_TIMEOUT": 5,
+            "CONNECTION_POOL_CLASS_KWARGS": {
+                "max_connections": 50,
+                "timeout": 20,
+            },
+            "PARSER_CLASS": "redis.connection._HiredisParser",
+        },
+    },
+}
+
+# Настройки сессий
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"

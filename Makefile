@@ -6,6 +6,7 @@ DB_CONTAINER = medcenter-db
 APP_CONTAINER = main-app
 LOGS = docker logs
 ENV = --env-file .env
+ENV_PROD = --env-file .env.prod
 DB = med_center
 DB_USER = my_user
 APP_FILE = docker_compose/app.yaml
@@ -15,11 +16,11 @@ MANAGE_PY = python manage.py
 
 .PHONY: build-prod
 build-prod:
-	${DC} -f ${PROD_BUILD_FILE} ${ENV} build
+	${DC} -f ${PROD_BUILD_FILE} ${ENV_PROD} build
 
 .PHONY: app-prod
 app-prod:
-	${DC} -f ${PROD_FILE} ${ENV} up --build -d
+	${DC} -f ${PROD_FILE} ${ENV_PROD} up --build -d
 
 .PHONY: prod-down
 prod-down:

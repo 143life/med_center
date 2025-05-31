@@ -45,7 +45,7 @@ detect_system() {
 check_requirements() {
     log "Проверка необходимых утилит..."
     
-    REQUIRED_TOOLS="docker docker-compose curl"
+    REQUIRED_TOOLS="docker curl make"
     MISSING_TOOLS=""
     
     for tool in $REQUIRED_TOOLS; do
@@ -56,16 +56,23 @@ check_requirements() {
     
     if [ ! -z "$MISSING_TOOLS" ]; then
         error "Не установлены следующие утилиты:$MISSING_TOOLS"
-        error "Установите их перед продолжением"
+        error "Установите их командой: sudo apt install -y$MISSING_TOOLS"
         exit 1
     fi
     
     # Проверка версий
     DOCKER_VERSION=$(docker --version | cut -d ' ' -f3 | cut -d ',' -f1)
-    COMPOSE_VERSION=$(docker-compose --version | cut -d ' ' -f3 | cut -d ',' -f1)
+    COMPOSE_VERSION=$(docker compose version --short 2>/dev/null || echo "не установлен")
     
     log "Docker версия: $DOCKER_VERSION"
     log "Docker Compose версия: $COMPOSE_VERSION"
+
+    # Проверка наличия docker compose
+    if ! docker compose version &> /dev/null; then
+        error "Docker Compose не установлен или установлен некорректно"
+        error "Установите его командой: sudo apt install -y docker-compose-plugin"
+        exit 1
+    fi
 }
 
 # Проверка наличия файла .env.prod
@@ -142,7 +149,7 @@ check_disk_space() {
 cleanup() {
     log "Очистка старых контейнеров..."
     
-    if docker-compose -f docker_compose/docker-compose.prod.yaml ps -q | grep -q .; then
+    if docker compose -f docker_compose/docker-compose.prod.yaml ps -q | grep -q .; then
         make prod-down || true
     fi
     
@@ -173,7 +180,7 @@ start_containers() {
     
     if ! make app-prod; then
         error "Ошибка при запуске контейнеров"
-        docker-compose -f docker_compose/docker-compose.prod.yaml logs
+        docker compose -f docker_compose/docker-compose.prod.yaml logs
         exit 1
     fi
 }
@@ -207,7 +214,7 @@ health_check() {
     
     error "Приложение не отвечает после $MAX_RETRIES попыток"
     error "Проверьте логи контейнеров:"
-    docker-compose -f docker_compose/docker-compose.prod.yaml logs
+    docker compose -f docker_compose/docker-compose.prod.yaml logs
     exit 1
 }
 

@@ -1,6 +1,8 @@
+import sys
+
 import environ
 
-from .main import *  # noqa
+from .main import BASE_DIR
 
 
 # Содержит переменные окружения
@@ -14,10 +16,18 @@ DEBUG = False
 ALLOWED_HOSTS = [
     "smtu-med.ru",
     "www.smtu-med.ru",
+    "localhost",
+    "127.0.0.1",
+    "0.0.0.0",
     "main-app",  # Имя сервиса в Docker
-    "localhost",  # Для локального тестирования
-    "127.0.0.1",  # Для локального тестирования
 ]
+
+# Отладочный код
+print("USED SETTINGS FILE: prod.py", file=sys.stderr)
+print("ALLOWED_HOSTS type:", type(ALLOWED_HOSTS), file=sys.stderr)
+print("ALLOWED_HOSTS content:", ALLOWED_HOSTS, file=sys.stderr)
+for host in ALLOWED_HOSTS:
+    print(f"Host type: {type(host)}, value: {host}", file=sys.stderr)
 
 # Настройки безопасности (временно отключаем HTTPS-only настройки)
 SECURE_SSL_REDIRECT = False  # Временно отключаем, пока нет SSL
@@ -49,8 +59,6 @@ CSP_CONNECT_SRC = (
 )
 
 # Настройки статических и медиа файлов
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "static"  # noqa
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"  # noqa
 
@@ -95,6 +103,7 @@ CACHES = {
                 "max_connections": 50,
                 "timeout": 20,
             },
+            "PARSER_CLASS": "redis.connection.PythonParser",
         },
     },
 }

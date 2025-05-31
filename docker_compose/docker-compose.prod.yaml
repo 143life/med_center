@@ -19,6 +19,12 @@ services:
     networks:
       - backend
     restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   postgres:
     image: postgres:latest
@@ -47,7 +53,6 @@ services:
     container_name: medcenter-nginx
     ports:
       - "80:80"
-      #- "443:443"
     volumes:
       - ./nginx/conf:/etc/nginx/conf.d
       #- ./nginx/ssl:/etc/letsencrypt
@@ -63,6 +68,7 @@ services:
   celery-worker:
     image: docker_compose-main-app:latest
     container_name: medcenter-celery-worker
+    entrypoint: []
     command: celery -A core worker --loglevel=info
     depends_on:
       - main-app
@@ -79,11 +85,10 @@ services:
   celery-beat:
     image: docker_compose-main-app:latest
     container_name: medcenter-celery-beat
-    command: celery -A core beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    entrypoint: []
+    command: celery -A core beat --loglevel=info
     depends_on:
-      - main-app
-      - redis
-      - postgres
+      - celery-worker
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - DJANGO_SETTINGS_MODULE=core.project.settings.prod
