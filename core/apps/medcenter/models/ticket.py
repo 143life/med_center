@@ -9,7 +9,7 @@ from .person import Person
 class Ticket(TimedBaseModel):
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
     datetime = models.DateTimeField("Дата и время создания")
-    number = models.IntegerField("Номер", max_length=3)
+    number = models.IntegerField("Номер")
     completed = models.BooleanField("Завершен", default=False)
 
     def to_entity(self) -> TicketEntity:

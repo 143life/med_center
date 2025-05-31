@@ -4,88 +4,72 @@
 
 {% block content %}
 <div class="container my-5">
-    <!-- Герой-секция -->
-    <div class="row align-items-center mb-5">
-        <div class="col-lg-6">
-            <h1 class="display-4 fw-bold mb-4">Медицинский центр<br><span class="text-primary">"Здоровье+"</span></h1>
-            <p class="lead mb-4">Профессиональная медицинская помощь с заботой о каждом пациенте</p>
-            
-            <div class="d-flex gap-3">
-                {% if user.is_authenticated %}
-                    <a href="{% url 'profile' %}" class="btn btn-primary btn-lg px-4">
-                        <i class="fas fa-user me-2"></i>Личный кабинет
-                    </a>
-                {% else %}
-                    <a href="{% url 'signup' %}" class="btn btn-primary btn-lg px-4">
-                        <i class="fas fa-user-plus me-2"></i>Зарегистрироваться
-                    </a>
-                    <a href="{% url 'login' %}" class="btn btn-outline-secondary btn-lg px-4">
-                        <i class="fas fa-sign-in-alt me-2"></i>Войти
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <img src="https://via.placeholder.com/600x400" alt="Медцентр" class="img-fluid rounded shadow">
-        </div>
-    </div>
+	<!-- Герой-секция -->
+	<div class="row align-items-center mb-5">
+		<div class="col-lg-6">
+			<h1 class="display-4 fw-bold mb-4">Медицинский центр<br><span class="text-primary">"Корабелка"</span></h1>
+			<p class="lead mb-4">Профессиональная медицинская помощь с заботой о каждом пациенте</p>
+			
+			<div class="d-flex gap-3">
+				{% if user.is_authenticated %}
+					<a href="{% url 'account:profile' %}" class="btn btn-primary btn-lg px-4">
+						<i class="fas fa-user me-2"></i>Личный кабинет
+					</a>
+				{% else %}
+					<a href="{% url 'account:signup' %}" class="btn btn-primary btn-lg px-4">
+						<i class="fas fa-user-plus me-2"></i>Зарегистрироваться
+					</a>
+					<a href="{% url 'account:login' %}" class="btn btn-outline-secondary btn-lg px-4">
+						<i class="fas fa-sign-in-alt me-2"></i>Войти
+					</a>
+				{% endif %}
+			</div>
+		</div>
+		<div class="col-lg-6">
+		<!--  img src="https://via.placeholder.com/600x400" alt="Медцентр" class="img-fluid rounded shadow" -->
+		</div>
+	</div>
 
-    <!-- Сервисы -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <h2 class="text-center mb-4">Наши услуги</h2>
-        </div>
-        
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <div class="bg-light rounded-circle p-3 mb-3 mx-auto" style="width: 80px; height: 80px;">
-                        <i class="fas fa-user-md text-primary fs-3"></i>
-                    </div>
-                    <h5>Консультации врачей</h5>
-                    <p class="text-muted">Прием специалистов высшей категории</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <div class="bg-light rounded-circle p-3 mb-3 mx-auto" style="width: 80px; height: 80px;">
-                        <i class="fas fa-flask text-primary fs-3"></i>
-                    </div>
-                    <h5>Анализы</h5>
-                    <p class="text-muted">Лабораторная диагностика</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <div class="bg-light rounded-circle p-3 mb-3 mx-auto" style="width: 80px; height: 80px;">
-                        <i class="fas fa-calendar-check text-primary fs-3"></i>
-                    </div>
-                    <h5>Онлайн-запись</h5>
-                    <p class="text-muted">Запишитесь на прием в любое время</p>
-                </div>
-            </div>
-        </div>
-    </div>
+	<!-- Сервисы -->
+	<div class="row justify-content-center mb-5">  <!-- Центрируем всю строку -->
+		<div class="col-lg-5 col-md-6 mb-4">  <!-- Гибкие пропорции для разных экранов -->
+			<div class="card h-100 border-0 shadow-sm hover-lift">  <!-- Эффект при наведении -->
+				<div class="card-body text-center p-4">  <!-- Увеличиваем отступы -->
+					<div class="bg-light rounded-circle p-3 mb-4 mx-auto" style="width: 90px; height: 90px;">  <!-- Увеличиваем круг -->
+						<i class="fas fa-user-md text-primary fs-2"></i>  <!-- Увеличиваем иконку -->
+					</div>
+					<h4 class="mb-3">Профосмотр</h4>  <!-- Более крупный заголовок -->
+					<p class="text-muted mb-0">Прием специалистов высшей категории</p>  <!-- Улучшенные отступы -->
+				</div>
+			</div>
+		</div>
+		
+		<div class="col-lg-5 col-md-6 mb-4">
+			<div class="card h-100 border-0 shadow-sm hover-lift">
+				<div class="card-body text-center p-4">
+					<div class="bg-light rounded-circle p-3 mb-4 mx-auto" style="width: 90px; height: 90px;">
+						<i class="fas fa-flask text-primary fs-2"></i>
+					</div>
+					<h4 class="mb-3">Диспансеризация</h4>
+					<p class="text-muted mb-0">Запишитесь на прием через администратора</p>
+				</div>
+			</div>
+		</div>
+	</div>
 
-    <!-- Для администраторов -->
-    {% if user.is_authenticated and user.role == 'admin' %}
-    <div class="alert alert-warning mt-5">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h4 class="alert-heading"><i class="fas fa-exclamation-circle me-2"></i>Администратору</h4>
-                <p class="mb-0">У вас есть доступ к управлению системой</p>
-            </div>
-            <a href="/admin/" class="btn btn-danger">
-                <i class="fas fa-cogs me-1"></i> Панель управления
-            </a>
-        </div>
-    </div>
-    {% endif %}
+	<!-- Для администраторов -->
+	{% if user.is_authenticated and user.role == 'admin' %}
+	<div class="alert alert-warning mt-5">
+		<div class="d-flex justify-content-between align-items-center">
+			<div>
+				<h4 class="alert-heading"><i class="fas fa-exclamation-circle me-2"></i>Администратору</h4>
+				<p class="mb-0">У вас есть доступ к управлению системой</p>
+			</div>
+			<a href="/admin/" class="btn btn-danger">
+				<i class="fas fa-cogs me-1"></i> Панель управления
+			</a>
+		</div>
+	</div>
+	{% endif %}
 </div>
 {% endblock %}

@@ -1,6 +1,7 @@
 .vscode/
 *.pyc
 .env
+.env.prod
 core\project\settings\local.py
 __pycache__/
 static/*

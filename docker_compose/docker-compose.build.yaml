@@ -10,12 +10,13 @@ services:
       - "${DJANGO_PORT}:8000"
     command: "sh /entrypoint.sh"
     env_file:
-      - ../.env
+      - ../.env.prod
     depends_on:
       - postgres
       - redis
     volumes:
       - ..:/app/
+
   postgres:
     image: postgres:latest
     container_name: medcenter-db
@@ -24,13 +25,16 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
-      - ../.env
+      - ../.env.prod
+    restart: always
 
   redis:
     image: redis:alpine
     container_name: medcenter-redis
     ports:
       - "6379:6379"
+    restart: always
 
 volumes:
   postgres_data:
+  static_volume:

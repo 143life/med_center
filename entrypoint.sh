@@ -1,32 +1,66 @@
-#!/bin/bash
+#!/bin/sh
 
 # функция для ожидания доступности порта
 wait_for_port() {
-    local host="$1"
-    local port="$2"
-    local timeout=10
-    local start_time=$(date +%s)
+    host=$1
+    port=$2
+    timeout=30  # Увеличиваем таймаут для продакшена
+    start_time=$(date +%s)
 
+    echo "Waiting for $host:$port..."
+    
     # попробовать использовать nc, если установлен
-    local nc_command="nc"
-    type $nc_command >/dev/null 2>&1 || nc_command="ncat"
-    while ! $nc_command -z "$host" "$port" >/dev/null 2>&1; do
+    nc_command="nc"
+    if ! command -v $nc_command > /dev/null 2>&1; then
+        nc_command="ncat"
+    fi
+
+    while ! $nc_command -z "$host" "$port" > /dev/null 2>&1; do
         sleep 1
-        local current_time=$(date +%s)
-        local elapsed_time=$((current_time - start_time))
-        echo "trying to connecto to pg via $host:$port"
+        current_time=$(date +%s)
+        elapsed_time=$((current_time - start_time))
+        echo "Trying to connect to $host:$port (elapsed: ${elapsed_time}s)"
 
         if [ $elapsed_time -ge $timeout ]; then
-            echo "Unable to connect to pg"
+            echo "Error: Unable to connect to $host:$port after ${timeout} seconds"
             exit 1
         fi
     done
+    echo "$host:$port is available"
 }
 
-# Ожидание доступности порта PostgreSQL
+# Проверка наличия необходимых переменных окружения
+for var in DJANGO_SECRET_KEY POSTGRES_DB POSTGRES_USER POSTGRES_PASSWORD; do
+    eval value=\$$var
+    if [ -z "$value" ]; then
+        echo "Error: Required environment variable $var is not set"
+        exit 1
+    fi
+done
+
+echo "Starting application initialization..."
+
+# Ожидание доступности сервисов
 wait_for_port "postgres" 5432
+wait_for_port "redis" 6379
 
-# Запуск Django-приложения
-#python manage.py runserver 0.0.0.0:8000
+echo "Running database migrations..."
+# Применение миграций
+python manage.py migrate --noinput
 
-daphne core.project.asgi:application --bind 0.0.0.0 --port 8000 --verbosity 2
+echo "Collecting static files..."
+# Сбор статики
+python manage.py collectstatic --noinput
+
+echo "Creating cache tables..."
+# Создание таблиц кэша
+python manage.py createcachetable
+
+echo "Starting Daphne server..."
+# Запуск с продакшен настройками
+exec daphne \
+    -b 0.0.0.0 \
+    -p 8000 \
+    --access-log - \
+    --proxy-headers \
+    core.project.asgi:application

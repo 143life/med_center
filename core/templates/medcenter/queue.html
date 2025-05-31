@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         queue.forEach(item => {
             const ticketNumber = `${item.ticket__number}`;
+            const doctor = `${item.doctor_schedule__doctor__specialization__title}`;
             const cabinetNumber = `${item.doctor_schedule__cabinet_number}`;
             const timeBegin = new Date(item.time_begin).toLocaleTimeString();
             const timeEnd = new Date(item.time_end).toLocaleTimeString();
@@ -48,12 +49,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     <h5 class="mb-1">${ticketNumber}</h5>
                     <small>${timeBegin} - ${timeEnd}</small>
                 </div>
-                <p class="mb-1">Врач: ${cabinetNumber}</p>
                 <small>Кабинет: ${item.doctor_schedule__cabinet_number}</small>
             </div>
             `;
         });
         
+		//<p class="mb-1">Врач: ${doctor}</p>
+
         html += '</div>';
         queueContainer.innerHTML = html;
     }
@@ -65,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Фоллбек на polling
         function fetchQueue() {
-            fetch('/api/queue/')  // Вам нужно создать этот endpoint
+            fetch('/api/queue/')
                 .then(response => response.json())
                 .then(data => renderQueue(data.queue))
                 .catch(error => {
@@ -80,3 +82,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
+

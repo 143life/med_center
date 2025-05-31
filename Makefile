@@ -9,7 +9,21 @@ ENV = --env-file .env
 DB = med_center
 DB_USER = my_user
 APP_FILE = docker_compose/app.yaml
+PROD_BUILD_FILE = docker_compose/docker-compose.build.yaml
+PROD_FILE = docker_compose/docker-compose.prod.yaml
 MANAGE_PY = python manage.py
+
+.PHONY: build-prod
+build-prod:
+	${DC} -f ${PROD_BUILD_FILE} ${ENV} build
+
+.PHONY: app-prod
+app-prod:
+	${DC} -f ${PROD_FILE} ${ENV} up --build -d
+
+.PHONY: prod-down
+prod-down:
+	${DC} -f ${PROD_FILE} down
 
 .PHONY: build
 build:

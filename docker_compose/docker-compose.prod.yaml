@@ -1,0 +1,103 @@
+version: '3.9'
+
+services:
+  main-app:
+    image: docker_compose-main-app:latest
+    container_name: main-app
+    ports:
+      - "${DJANGO_PORT}:8000"
+    command: "sh /entrypoint.sh"
+    env_file:
+      - ../.env.prod
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ..:/app/
+      - static_volume:/app/static
+      - media_volume:/app/media
+    networks:
+      - backend
+    restart: always
+
+  postgres:
+    image: postgres:latest
+    container_name: medcenter-db
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ../.env.prod
+    networks:
+      - backend
+    restart: always
+
+  redis:
+    image: redis:alpine
+    container_name: medcenter-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+    restart: always
+    
+  nginx:
+    image: nginx:alpine
+    container_name: medcenter-nginx
+    ports:
+      - "80:80"
+      #- "443:443"
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d
+      #- ./nginx/ssl:/etc/letsencrypt
+      - ./nginx/logs:/var/log/nginx
+      - static_volume:/app/static
+      - media_volume:/app/media
+    depends_on:
+      - main-app
+    networks:
+      - backend
+    restart: always
+
+  celery-worker:
+    image: docker_compose-main-app:latest
+    container_name: medcenter-celery-worker
+    command: celery -A core worker --loglevel=info
+    depends_on:
+      - main-app
+      - redis
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - DJANGO_SETTINGS_MODULE=core.project.settings.prod
+    env_file:
+      - ../.env.prod
+    networks:
+      - backend
+    restart: always
+
+  celery-beat:
+    image: docker_compose-main-app:latest
+    container_name: medcenter-celery-beat
+    command: celery -A core beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    depends_on:
+      - main-app
+      - redis
+      - postgres
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - DJANGO_SETTINGS_MODULE=core.project.settings.prod
+    env_file:
+      - ../.env.prod
+    networks:
+      - backend
+    restart: always
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+
+networks:
+  backend:
+    driver: bridge

@@ -9,7 +9,7 @@ from .schedule import Schedule
 class DoctorSchedule(TimedBaseModel):
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
-    cabinet_number = models.IntegerField("Кабинет", max_length=3)
+    cabinet_number = models.IntegerField("Кабинет")
 
     def __str__(self):
         return f"{self.doctor}, {self.schedule}, {self.cabinet_number}"

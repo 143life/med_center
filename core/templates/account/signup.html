@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Регистрация</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <p>{{ field }}: {{ error }}</p>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Явное определение всех полей -->
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label">Логин*</label>
+                            <input type="text" name="username" class="form-control" 
+                                   id="id_username" required maxlength="150">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_email" class="form-label">Email*</label>
+                            <input type="email" name="email" class="form-control" 
+                                   id="id_email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_phone" class="form-label">Телефон</label>
+                            <input type="text" name="phone" class="form-control" 
+                                   id="id_phone" maxlength="20">
+                            <small class="form-text text-muted">Формат: +79991234567</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_password1" class="form-label">Пароль*</label>
+                            <input type="password" name="password1" class="form-control" 
+                                   id="id_password1" required>
+                            <small class="form-text text-muted">Минимум 8 символов.</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_password2" class="form-label">Подтверждение пароля*</label>
+                            <input type="password" name="password2" class="form-control" 
+                                   id="id_password2" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+                    </form>
+                    
+                    <div class="mt-3 text-center">
+                        <p>Уже есть аккаунт? <a href="{% url 'account:login' %}">Войти</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

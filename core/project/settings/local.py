@@ -1,14 +1,20 @@
+import environ
+
 from .main import *  # noqa
 
+
+# Содержит переменные окружения
+env = environ.Env()
+environ.Env.read_env(BASE_DIR / ".env.prod")  # noqa
 
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    "localhost",
     "127.0.0.1",
-    "192.168.1.36",  # Windows
-    "10.1.30.46",  # Windows
-    "192.168.1.42",  # Ubuntu
-    "192.168.1.34"
+    "main-app",  # Имя сервиса в Docker
+    "smtu-med.ru",
+    "www.smtu-med.ru",
 ]
 
 CSP_CONNECT_SRC = ["'self'", "ws://127.0.0.1:8000"]
@@ -29,12 +35,13 @@ AUTH_USER_MODEL = "account.User"
 
 # Для автоматического создания групп
 AUTHENTICATION_BACKENDS = [
+    "core.apps.account.backends.EmailAuthBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 
 # Редиректы
 LOGIN_URL = "/login/"
-LOGIN_REDIRECT_URL = "/profile/"
+LOGIN_REDIRECT_URL = "account:profile"
 LOGOUT_REDIRECT_URL = ""
 
 CHANNEL_LAYERS = {
