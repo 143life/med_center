@@ -86,9 +86,12 @@ services:
     image: docker_compose-main-app:latest
     container_name: medcenter-celery-beat
     entrypoint: []
-    command: celery -A core beat --loglevel=info
+    command: celery -A core beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     depends_on:
       - celery-worker
+      - main-app
+      - redis
+      - postgres
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - DJANGO_SETTINGS_MODULE=core.project.settings.prod

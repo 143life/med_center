@@ -49,9 +49,6 @@ COPY --chown=appuser:appgroup . /app/
 COPY --chown=appuser:appgroup entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Проверка конфигурации
-RUN python manage.py check --deploy --settings=core.project.settings.prod
-
 # Переключаемся на непривилегированного пользователя
 USER appuser
 

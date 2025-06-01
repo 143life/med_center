@@ -2,7 +2,7 @@ import sys
 
 import environ
 
-from .main import BASE_DIR
+from .main import *  # noqa
 
 
 # Содержит переменные окружения
@@ -76,19 +76,10 @@ CELERY_RESULT_BACKEND = "redis://redis:6379/0"
 CELERY_TIMEZONE = "Europe/Moscow"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 минут
-CELERY_IMPORTS = ("core.apps.medcenter.tasks",)
 
-# Настройки периодических задач Celery
-CELERY_BEAT_SCHEDULE = {
-    "update-waiting-list": {
-        "task": "core.apps.medcenter.tasks.auto_update_to_waiting_list",
-        "schedule": 60.0,  # каждую минуту
-    },
-    "complete-appointments": {
-        "task": "core.apps.medcenter.tasks.auto_complete_appointments_and_delete_from_waiting_list",  # noqa
-        "schedule": 60.0,  # каждую минуту
-    },
-}
+CELERY_IMPORTS = (
+    "core.apps.medcenter.tasks",
+)  # Явное указание модуля с задачами
 
 # Настройки кэширования
 CACHES = {
@@ -103,7 +94,7 @@ CACHES = {
                 "max_connections": 50,
                 "timeout": 20,
             },
-            "PARSER_CLASS": "redis.connection.PythonParser",
+            "PARSER_CLASS": "redis.connection.DefaultParser",
         },
     },
 }
@@ -174,7 +165,7 @@ LOGIN_REDIRECT_URL = "account:profile"
 LOGOUT_REDIRECT_URL = "/"
 
 # API настройки
-API_BASE_URL = "https://smtu-med.ru/api/v1/"
+API_BASE_URL = "http://localhost:8000/api/v1/"
 
 # Дополнительные настройки безопасности
 X_FRAME_OPTIONS = "DENY"  # Запрещаем встраивание сайта в iframe

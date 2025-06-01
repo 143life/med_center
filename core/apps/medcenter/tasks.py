@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 from datetime import timedelta
 
@@ -8,6 +9,9 @@ from core.apps.medcenter.models.appointment import Appointment
 from core.apps.medcenter.models.doctor_schedule import DoctorSchedule
 from core.apps.medcenter.models.waiting_list import WaitingList
 from core.celery import app
+
+
+logger = logging.getLogger(__name__)
 
 
 @app.task(bind=True)
@@ -64,7 +68,8 @@ def auto_update_to_waiting_list(self, *args, **kwargs):
             time_end__gt=now,
         ).select_related("doctor_schedule__doctor__specialization")
 
-        if current_queue.count() >= 10:
+        queue_size = current_queue.count()
+        if queue_size >= 10:
             return
 
         # 2. Находим незавершенные приемы не в очереди
@@ -94,7 +99,6 @@ def auto_update_to_waiting_list(self, *args, **kwargs):
         ).values_list("doctor_schedule_id", flat=True)
 
         free_doctors = working_doctors.exclude(id__in=busy_doctor_ids)
-
         if free_doctors.exists():
             assign_to_available_doctor(
                 uncompleted_appointments,
@@ -105,7 +109,6 @@ def auto_update_to_waiting_list(self, *args, **kwargs):
 
         # 5. Пытаемся запланировать на ближайшее освобождающееся время
         ending_appointments = current_queue.order_by("time_end")
-
         for ending_appt in ending_appointments:
             doctor = ending_appt.doctor_schedule.doctor
             end_time = ending_appt.time_end

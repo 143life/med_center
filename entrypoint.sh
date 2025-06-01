@@ -44,6 +44,10 @@ echo "Starting application initialization..."
 wait_for_port "postgres" 5432
 wait_for_port "redis" 6379
 
+echo "Checking Django configuration..."
+# Проверка конфигурации Django
+python manage.py check --deploy
+
 echo "Running database migrations..."
 # Применение миграций
 python manage.py migrate --noinput

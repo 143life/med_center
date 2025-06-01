@@ -1,6 +1,6 @@
 import environ
 
-from .main import BASE_DIR
+from .main import *  # noqa
 
 
 # Содержит переменные окружения
@@ -67,7 +67,7 @@ CACHES = {
                 "max_connections": 50,
                 "timeout": 20,
             },
-            "PARSER_CLASS": "redis.connection._HiredisParser",
+            "PARSER_CLASS": "redis.connection.DefaultParser",
         },
     },
 }
