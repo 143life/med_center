@@ -39,8 +39,10 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Создаем необходимые директории и устанавливаем права
 RUN mkdir -p /app/static /app/media /app/logs && \
+    touch /app/logs/django.log && \
     chown -R appuser:appgroup /app && \
-    chmod -R 755 /app/static /app/media /app/logs
+    chmod -R 755 /app/static /app/media && \
+    chmod -R 777 /app/logs
 
 # Копируем код приложения
 COPY --chown=appuser:appgroup . /app/

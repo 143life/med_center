@@ -1,13 +1,7 @@
 import sys
 
-import environ
-
 from .main import *  # noqa
 
-
-# Содержит переменные окружения
-env = environ.Env()
-environ.Env.read_env(BASE_DIR / ".env.prod")  # noqa
 
 # Отключаем режим отладки
 DEBUG = False

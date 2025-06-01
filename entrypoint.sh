@@ -44,6 +44,11 @@ echo "Starting application initialization..."
 wait_for_port "postgres" 5432
 wait_for_port "redis" 6379
 
+echo "Creating logs directory..."
+# Создание директории для логов с правильными правами
+mkdir -p /app/logs
+chmod 777 /app/logs
+
 echo "Checking Django configuration..."
 # Проверка конфигурации Django
 python manage.py check --deploy
