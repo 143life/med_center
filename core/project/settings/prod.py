@@ -6,15 +6,12 @@ from .main import *  # noqa
 # Отключаем режим отладки
 DEBUG = False
 
-# Разрешенные хосты
-ALLOWED_HOSTS = [
-    "smtu-med.ru",
-    "www.smtu-med.ru",
-    "localhost",
-    "127.0.0.1",
-    "0.0.0.0",
-    "main-app",  # Имя сервиса в Docker
-]
+ALLOWED_HOSTS = env.list(  # noqa
+    "ALLOWED_HOSTS",
+    default=[
+        "127.0.0.1",
+    ],
+)
 
 # Отладочный код
 print("USED SETTINGS FILE: prod.py", file=sys.stderr)
