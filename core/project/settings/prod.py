@@ -41,6 +41,7 @@ CSP_CONNECT_SRC = (
 )
 
 # Настройки статических и медиа файлов
+STATIC_URL = "/static/"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"  # noqa
 
