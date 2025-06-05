@@ -12,10 +12,12 @@ class Doctor(TimedBaseModel):
         Person,
         on_delete=models.CASCADE,
         primary_key=True,
+        verbose_name="Персональные данные",
     )
     specialization = models.ForeignKey(
         Specialization,
         on_delete=models.CASCADE,
+        verbose_name="Специальность",
     )
 
     def to_entity(self):
@@ -25,9 +27,10 @@ class Doctor(TimedBaseModel):
         )
 
     def __str__(self):
-        return f"{self.person}, {self.specialization}"
+        return f"{self.person} - {self.specialization}"
 
     class Meta:
         verbose_name = "Врач"
         verbose_name_plural = "Врачи"
         app_label = "medcenter"
+        ordering = ["person__last_name", "person__first_name"]

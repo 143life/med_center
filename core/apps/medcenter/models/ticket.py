@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from core.apps.common.models import TimedBaseModel
@@ -7,10 +8,34 @@ from .person import Person
 
 
 class Ticket(TimedBaseModel):
-    person = models.ForeignKey(Person, on_delete=models.CASCADE)
+    person = models.ForeignKey(
+        Person,
+        on_delete=models.CASCADE,
+        verbose_name="Пациент",
+    )
     datetime = models.DateTimeField("Дата и время создания")
-    number = models.IntegerField("Номер")
+    number = models.IntegerField("Номер талона")
     completed = models.BooleanField("Завершен", default=False)
+
+    def clean(self):
+        # Проверяем, существует ли незавершенный талон с таким номером
+        if not self.completed:
+            existing_ticket = (
+                Ticket.objects.filter(number=self.number, completed=False)
+                .exclude(pk=self.pk)
+                .first()
+            )
+
+            if existing_ticket:
+                raise ValidationError(
+                    {
+                        "number": "Талон с таким номером есть и не завершен",
+                    },
+                )
+
+    def save(self, *args, **kwargs):
+        self.clean()  # Вызываем валидацию перед сохранением
+        super().save(*args, **kwargs)
 
     def to_entity(self) -> TicketEntity:
         return TicketEntity(
@@ -32,9 +57,17 @@ class Ticket(TimedBaseModel):
         )
 
     def __str__(self):
-        return f"{self.number}"
+        return f"Талон №{self.number} - {self.person})"
 
     class Meta:
         verbose_name = "Талон"
         verbose_name_plural = "Талоны"
         app_label = "medcenter"
+        ordering = ["-datetime"]  # Сортировка по умолчанию
+        constraints = [
+            models.UniqueConstraint(
+                fields=["number"],
+                condition=models.Q(completed=False),
+                name="unique_uncompleted_ticket_number",
+            ),
+        ]

@@ -8,10 +8,15 @@ from .ticket import Ticket
 
 
 class Appointment(TimedBaseModel):
-    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
+    ticket = models.ForeignKey(
+        Ticket,
+        on_delete=models.CASCADE,
+        verbose_name="Талон",
+    )
     specialization = models.ForeignKey(
         Specialization,
         on_delete=models.CASCADE,
+        verbose_name="Специальность",
     )
     completed = models.BooleanField("Завершен", default=False)
 
@@ -31,7 +36,8 @@ class Appointment(TimedBaseModel):
         )
 
     def __str__(self):
-        return f"{self.ticket}, {self.specialization}"
+        status = "Завершен" if self.completed else "В ожидании"
+        return f"Приём {self.ticket} - {self.specialization} ({status})"
 
     class Meta:
         constraints = [
@@ -43,3 +49,4 @@ class Appointment(TimedBaseModel):
         verbose_name = "Приём"
         verbose_name_plural = "Приёмы"
         app_label = "medcenter"
+        ordering = ["-created_at"]  # Сортировка по умолчанию

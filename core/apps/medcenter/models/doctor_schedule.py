@@ -7,12 +7,22 @@ from .schedule import Schedule
 
 
 class DoctorSchedule(TimedBaseModel):
-    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
-    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
-    cabinet_number = models.IntegerField("Кабинет")
+    doctor = models.ForeignKey(
+        Doctor,
+        on_delete=models.CASCADE,
+        verbose_name="Врач",
+    )
+    schedule = models.ForeignKey(
+        Schedule,
+        on_delete=models.CASCADE,
+        verbose_name="Расписание",
+    )
+    cabinet_number = models.IntegerField("Номер кабинета")
 
     def __str__(self):
-        return f"{self.doctor}, {self.schedule}, {self.cabinet_number}"
+        return (
+            f"{self.doctor} - Кабинет {self.cabinet_number} ({self.schedule})"
+        )
 
     class Meta:
         constraints = [
@@ -24,3 +34,4 @@ class DoctorSchedule(TimedBaseModel):
         verbose_name = "Расписание работы"
         verbose_name_plural = "Расписания работы"
         app_label = "medcenter"
+        ordering = ["doctor", "schedule__datetime_begin"]

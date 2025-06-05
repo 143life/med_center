@@ -17,10 +17,14 @@ def send_queue_update(sender, instance, **kwargs):
         return
     channel_layer = get_channel_layer()
     WaitingList = apps.get_model("medcenter", "WaitingList")
-    queue = WaitingList.objects.filter().select_related(
-        "ticket",
-        "doctor_schedule",
-    )
+    queue = (
+        WaitingList.objects.filter()
+        .select_related(
+            "ticket",
+            "doctor_schedule",
+        )
+        .order_by("time_begin")
+    )  # Сортируем по времени начала приема
     serialized_queue = [
         {
             "ticket__number": item.ticket.number,

@@ -23,37 +23,96 @@ from .models import (
 
 # Register your models here.
 @admin.register(Appointment)
-class AppointnmentAdmin(admin.ModelAdmin):
-    list_display = ("ticket", "specialization")
+class AppointmentAdmin(admin.ModelAdmin):
+    list_display = ("ticket", "specialization", "completed")
+    list_filter = ("completed", "specialization")
+    search_fields = ("ticket__number", "specialization__title")
+    raw_id_fields = ("ticket", "specialization")
 
 
 @admin.register(DoctorSchedule)
 class DoctorScheduleAdmin(admin.ModelAdmin):
-    list_display = ("cabinet_number", "doctor", "schedule")
+    list_display = ("doctor", "schedule", "cabinet_number")
+    list_filter = (
+        "cabinet_number",
+        "schedule__datetime_begin",
+        "schedule__datetime_end",
+    )
+    search_fields = ("doctor__person__last_name", "doctor__person__first_name")
+    raw_id_fields = ("doctor", "schedule")
 
 
 @admin.register(Doctor)
 class DoctorAdmin(admin.ModelAdmin):
     list_display = ("person", "specialization")
+    list_filter = ("specialization",)
+    search_fields = (
+        "person__last_name",
+        "person__first_name",
+        "person__patronymic",
+    )
+    raw_id_fields = ("person",)
 
 
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ("first_name", "last_name")
+    list_display = ("last_name", "first_name", "patronymic", "date_birth")
+    list_filter = ("date_birth",)
+    search_fields = ("last_name", "first_name", "patronymic")
+    ordering = ("last_name", "first_name")
 
 
 @admin.register(Schedule)
 class ScheduleAdmin(admin.ModelAdmin):
-    list_display = ("datetime_begin", "datetime_end")
+    list_display = ("datetime_begin", "datetime_end", "get_weekdays")
+    list_filter = (
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday",
+    )
+    date_hierarchy = "datetime_begin"
+
+    def get_weekdays(self, obj):
+        days = []
+        if obj.monday:
+            days.append("Пн")
+        if obj.tuesday:
+            days.append("Вт")
+        if obj.wednesday:
+            days.append("Ср")
+        if obj.thursday:
+            days.append("Чт")
+        if obj.friday:
+            days.append("Пт")
+        if obj.saturday:
+            days.append("Сб")
+        if obj.sunday:
+            days.append("Вс")
+        return ", ".join(days)
+
+    get_weekdays.short_description = "Дни недели"
 
 
 @admin.register(Specialization)
-class SpecializationAdmin(admin.ModelAdmin): ...  # noqa
+class SpecializationAdmin(admin.ModelAdmin):
+    list_display = ("title",)
+    search_fields = ("title",)
 
 
 @admin.register(WaitingList)
 class WaitingListAdmin(admin.ModelAdmin):
-    list_display = ("ticket", "time_begin", "time_end")
+    list_display = ("ticket", "doctor_schedule", "time_begin", "time_end")
+    list_filter = ("time_begin", "time_end")
+    search_fields = (
+        "ticket__number",
+        "doctor_schedule__doctor__person__last_name",
+    )
+    date_hierarchy = "time_begin"
+    raw_id_fields = ("ticket", "doctor_schedule")
 
 
 class TicketAdminForm(forms.ModelForm):
@@ -92,7 +151,11 @@ class TicketAdminForm(forms.ModelForm):
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
     form = TicketAdminForm
-    list_display = ("person", "datetime", "number", "completed")
+    list_display = ("number", "person", "datetime", "completed")
+    list_filter = ("completed", "datetime")
+    search_fields = ("number", "person__last_name", "person__first_name")
+    date_hierarchy = "datetime"
+    raw_id_fields = ("person",)
 
     def save_model(self, request, obj, form, change):
         with transaction.atomic():

@@ -60,7 +60,17 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.username} ({self.email})"
+        role_display = self.get_role_display()
+        status = "Активен" if self.is_active else "Неактивен"
+        return f"{self.get_full_name() or self.username} ({self.email}) - {role_display} [{status}]"  # noqa
+
+    class Meta:
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
+        ordering = [
+            "-date_joined",
+        ]  # Сортировка по дате регистрации (новые сверху)
+        app_label = "account"
 
 
 class UserManager(BaseUserManager):

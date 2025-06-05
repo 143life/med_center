@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 
@@ -29,20 +30,26 @@ class ORMTicketService(BaseService[TicketFilters, Ticket, TicketDTO]):
         appointment_list: list[dict],
     ) -> tuple[Ticket, list[Appointment]]:
         """Создает талон и приемы в одной транзакции"""
-        ticket_dto = TicketDTO.objects.create(
-            person=PersonDTO.from_entity(ticket.person),
-            datetime=ticket.datetime,
-            number=ticket.number,
-            completed=ticket.completed,
-        )
-        ticket_entity = ticket_dto.to_entity()
-        appointment_list_response = [
-            ORMAppointmentService.create_appointment(
-                ticket=ticket_entity,
-                specialization_id=item,
-                completed=False,
+        try:
+            ticket_dto = TicketDTO.objects.create(
+                person=PersonDTO.from_entity(ticket.person),
+                datetime=ticket.datetime,
+                number=ticket.number,
+                completed=ticket.completed,
             )
-            for item in appointment_list
-        ]
+            ticket_entity = ticket_dto.to_entity()
+            appointment_list_response = [
+                ORMAppointmentService.create_appointment(
+                    ticket=ticket_entity,
+                    specialization_id=item,
+                    completed=False,
+                )
+                for item in appointment_list
+            ]
 
-        return (ticket_entity, appointment_list_response)
+            return (ticket_entity, appointment_list_response)
+        except ValidationError as e:
+            # Откатываем транзакцию и пробрасываем ошибку дальше
+            raise ValidationError(
+                e.message_dict if hasattr(e, "message_dict") else str(e),
+            )

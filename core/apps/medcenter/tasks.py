@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from core.apps.medcenter.models.appointment import Appointment
 from core.apps.medcenter.models.doctor_schedule import DoctorSchedule
+from core.apps.medcenter.models.ticket import Ticket
 from core.apps.medcenter.models.waiting_list import WaitingList
 from core.celery import app
 
@@ -69,7 +70,7 @@ def auto_update_to_waiting_list(self, *args, **kwargs):
         ).select_related("doctor_schedule__doctor__specialization")
 
         queue_size = current_queue.count()
-        if queue_size >= 10:
+        if queue_size >= 20:  # Увеличиваем максимальный размер очереди
             return
 
         # 2. Находим незавершенные приемы не в очереди
@@ -77,7 +78,13 @@ def auto_update_to_waiting_list(self, *args, **kwargs):
         uncompleted_appointments = (
             Appointment.objects.filter(completed=False)
             .exclude(ticket_id__in=busy_ticket_ids)
-            .select_related("specialization")
+            .select_related(
+                "specialization",
+                "ticket",
+            )  # Добавляем ticket для сортировки
+            .order_by(
+                "ticket__created_at",
+            )  # Сортируем по времени создания для FIFO
         )
 
         if not uncompleted_appointments.exists():
@@ -117,17 +124,44 @@ def auto_update_to_waiting_list(self, *args, **kwargs):
             next_schedule = DoctorSchedule.objects.filter(
                 doctor=doctor,
                 schedule__datetime_begin__lte=end_time,
-                schedule__datetime_end__gte=end_time + timedelta(minutes=30),
+                schedule__datetime_end__gte=end_time
+                + timedelta(minutes=10),  # Уменьшаем до 10 минут
                 **{f'schedule__{end_time.strftime("%A").lower()}': True},
             ).first()
 
             if not next_schedule:
                 continue
 
+            # Проверяем, нет ли других приемов в это время
+            has_other_appointments = WaitingList.objects.filter(
+                doctor_schedule__doctor=doctor,
+                time_begin__lt=end_time
+                + timedelta(minutes=10),  # Уменьшаем до 10 минут
+                time_end__gt=end_time,
+            ).exists()
+
+            if has_other_appointments:
+                continue
+
+            # Проверяем, что есть достаточный перерыв между приемами
+            previous_appointment = (
+                WaitingList.objects.filter(
+                    doctor_schedule__doctor=doctor,
+                    time_end__lte=end_time,
+                )
+                .order_by("-time_end")
+                .first()
+            )
+
+            if previous_appointment and (
+                end_time - previous_appointment.time_end
+            ) < timedelta(minutes=2):
+                continue
+
             # Ищем подходящий незавершенный прием для этой специализации
             suitable_appointment = uncompleted_appointments.filter(
                 specialization=doctor.specialization,
-            ).first()
+            ).first()  # Уже отсортировано по ticket__created_at
 
             if suitable_appointment:
                 WaitingList.objects.create(
@@ -147,7 +181,7 @@ def assign_to_available_doctor(appointments, doctors, now):
         spec_map[doc.doctor.specialization_id].append(doc)
 
     # Ищем первый подходящий прием
-    for appointment in appointments.order_by("ticket_id"):
+    for appointment in appointments.order_by("ticket__created_at"):
         if appointment.specialization_id in spec_map:
             # Берем первого свободного врача нужной специализации
             doctor_schedule = spec_map[appointment.specialization_id][0]
@@ -159,3 +193,40 @@ def assign_to_available_doctor(appointments, doctors, now):
                 time_end=now + timedelta(minutes=10),
             )
             break
+
+
+@app.task(bind=True)
+def auto_complete_tickets(self, *args, **kwargs):
+    """
+    Помечает талоны как завершенные,
+    если все связанные с ними приемы завершены.
+    """
+    with transaction.atomic():
+        # Находим все незавершенные талоны
+        uncompleted_tickets = Ticket.objects.filter(completed=False)
+
+        # Для каждого талона проверяем, все ли его приемы завершены
+        tickets_to_complete = []
+        for ticket in uncompleted_tickets:
+            # Проверяем, есть ли незавершенные приемы
+            has_uncompleted = Appointment.objects.filter(
+                ticket=ticket,
+                completed=False,
+            ).exists()
+
+            # Если все приемы завершены, добавить талон в список
+            if not has_uncompleted:
+                tickets_to_complete.append(ticket.id)
+
+        # Обновляем статус талонов
+        if tickets_to_complete:
+            updated_count = Ticket.objects.filter(
+                id__in=tickets_to_complete,
+            ).update(completed=True)
+        else:
+            updated_count = 0
+
+        return {
+            "updated_tickets": updated_count,
+            "ticket_ids": tickets_to_complete,
+        }

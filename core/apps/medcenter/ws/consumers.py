@@ -16,9 +16,13 @@ class QueueConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_current_queue(self):
         WaitingList = apps.get_model("medcenter", "WaitingList")
-        queue = WaitingList.objects.filter().select_related(
-            "ticket",
-            "doctor_schedule",
+        queue = (
+            WaitingList.objects.filter()
+            .select_related(
+                "ticket",
+                "doctor_schedule",
+            )
+            .order_by("time_begin")
         )
 
         return [

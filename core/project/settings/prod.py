@@ -1,5 +1,3 @@
-import sys
-
 from .main import *  # noqa
 
 
@@ -12,13 +10,6 @@ ALLOWED_HOSTS = env.list(  # noqa
         "127.0.0.1",
     ],
 )
-
-# Отладочный код
-print("USED SETTINGS FILE: prod.py", file=sys.stderr)
-print("ALLOWED_HOSTS type:", type(ALLOWED_HOSTS), file=sys.stderr)
-print("ALLOWED_HOSTS content:", ALLOWED_HOSTS, file=sys.stderr)
-for host in ALLOWED_HOSTS:
-    print(f"Host type: {type(host)}, value: {host}", file=sys.stderr)
 
 # Настройки безопасности (временно отключаем HTTPS-only настройки)
 SECURE_SSL_REDIRECT = False  # Временно отключаем, пока нет SSL

@@ -38,10 +38,10 @@ class Person(TimedBaseModel):
         )
 
     def __str__(self):
-        return f"{self.last_name} {self.first_name} {self.patronymic}"
+        return f"{self.last_name} {self.first_name} {self.patronymic} ({self.date_birth.strftime('%d.%m.%Y')})"  # noqa
 
     class Meta:
         verbose_name = "Человек"
         verbose_name_plural = "Люди"
-        ordering = ["last_name"]
+        ordering = ["last_name", "first_name", "patronymic"]
         app_label = "medcenter"
