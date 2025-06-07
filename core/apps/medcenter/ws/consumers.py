@@ -1,6 +1,7 @@
 import json
 
 from django.apps import apps
+from django.utils import timezone
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -16,6 +17,7 @@ class QueueConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_current_queue(self):
         WaitingList = apps.get_model("medcenter", "WaitingList")
+        now = timezone.now()
         queue = (
             WaitingList.objects.filter()
             .select_related(
@@ -31,6 +33,11 @@ class QueueConsumer(AsyncWebsocketConsumer):
                 "doctor_schedule__cabinet_number": item.doctor_schedule.cabinet_number,  # noqa
                 "time_begin": item.time_begin.isoformat(),
                 "time_end": item.time_end.isoformat(),
+                "status": (
+                    "current"
+                    if item.time_begin <= now <= item.time_end
+                    else "waiting"
+                ),
             }
             for item in queue
         ]

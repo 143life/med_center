@@ -5,6 +5,7 @@ from django.db.models.signals import (
     post_save,
 )
 from django.dispatch import receiver
+from django.utils import timezone
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -17,6 +18,7 @@ def send_queue_update(sender, instance, **kwargs):
         return
     channel_layer = get_channel_layer()
     WaitingList = apps.get_model("medcenter", "WaitingList")
+    now = timezone.now()
     queue = (
         WaitingList.objects.filter()
         .select_related(
@@ -31,6 +33,11 @@ def send_queue_update(sender, instance, **kwargs):
             "doctor_schedule__cabinet_number": item.doctor_schedule.cabinet_number,  # noqa
             "time_begin": item.time_begin.isoformat(),
             "time_end": item.time_end.isoformat(),
+            "status": (
+                "current"
+                if item.time_begin <= now <= item.time_end
+                else "waiting"
+            ),
         }
         for item in queue
     ]

@@ -1,8 +1,11 @@
-import logging
 from collections import defaultdict
 from datetime import timedelta
 
 from django.db import transaction
+from django.db.models import (
+    Count,
+    Q,
+)
 from django.utils import timezone
 
 from core.apps.medcenter.models.appointment import Appointment
@@ -10,9 +13,6 @@ from core.apps.medcenter.models.doctor_schedule import DoctorSchedule
 from core.apps.medcenter.models.ticket import Ticket
 from core.apps.medcenter.models.waiting_list import WaitingList
 from core.celery import app
-
-
-logger = logging.getLogger(__name__)
 
 
 @app.task(bind=True)
@@ -65,112 +65,84 @@ def auto_update_to_waiting_list(self, *args, **kwargs):
         current_weekday = now.strftime("%A").lower()
 
         # 1. Проверяем размер очереди
-        current_queue = WaitingList.objects.filter(
-            time_end__gt=now,
-        ).select_related("doctor_schedule__doctor__specialization")
-
-        queue_size = current_queue.count()
-        if queue_size >= 20:  # Увеличиваем максимальный размер очереди
+        current_queue = WaitingList.objects.filter(time_end__gt=now)
+        if current_queue.count() >= 20:
             return
 
-        # 2. Находим незавершенные приемы не в очереди
+        # 2. Находим незавершенные приемы, не в очереди
         busy_ticket_ids = current_queue.values_list("ticket_id", flat=True)
         uncompleted_appointments = (
             Appointment.objects.filter(completed=False)
             .exclude(ticket_id__in=busy_ticket_ids)
-            .select_related(
-                "specialization",
-                "ticket",
-            )  # Добавляем ticket для сортировки
-            .order_by(
-                "ticket__created_at",
-            )  # Сортируем по времени создания для FIFO
+            .select_related("specialization", "ticket")
+            .order_by("ticket__created_at")
         )
 
-        if not uncompleted_appointments.exists():
-            return
+        # 3. Получаем ID специализаций из незавершенных приемов
+        specialization_ids = uncompleted_appointments.values_list(
+            "specialization_id",
+            flat=True,
+        ).distinct()
 
-        # 3. Ищем работающих сегодня врачей
-        working_doctors = DoctorSchedule.objects.filter(
-            schedule__datetime_begin__lte=now,
-            schedule__datetime_end__gt=now,
-            **{f"schedule__{current_weekday}": True},
-        ).select_related("doctor__specialization")
+        # 4. Ищем работающих врачей нужных специализаций
+        working_doctors = (
+            DoctorSchedule.objects.filter(
+                schedule__datetime_begin__lte=now,
+                schedule__datetime_end__gt=now,
+                **{f"schedule__{current_weekday}": True},
+                doctor__specialization_id__in=specialization_ids,
+            )
+            .annotate(
+                appointment_count=Count(
+                    "waitinglist",
+                    filter=Q(waitinglist__time_end__gt=now),
+                ),
+            )
+            .select_related("doctor", "doctor__specialization", "schedule")
+            .order_by("appointment_count", "doctor_id")
+        )
 
         if not working_doctors.exists():
             return
 
-        # 4. Ищем свободных врачей прямо сейчас
-        busy_doctor_ids = current_queue.filter(
-            doctor_schedule__in=working_doctors,
-        ).values_list("doctor_schedule_id", flat=True)
-
-        free_doctors = working_doctors.exclude(id__in=busy_doctor_ids)
-        if free_doctors.exists():
-            assign_to_available_doctor(
-                uncompleted_appointments,
-                free_doctors,
-                now,
-            )
-            return
-
-        # 5. Пытаемся запланировать на ближайшее освобождающееся время
-        ending_appointments = current_queue.order_by("time_end")
-        for ending_appt in ending_appointments:
-            doctor = ending_appt.doctor_schedule.doctor
-            end_time = ending_appt.time_end
-
-            # Проверяем продолжение работы врача
-            next_schedule = DoctorSchedule.objects.filter(
-                doctor=doctor,
-                schedule__datetime_begin__lte=end_time,
-                schedule__datetime_end__gte=end_time
-                + timedelta(minutes=10),  # Уменьшаем до 10 минут
-                **{f'schedule__{end_time.strftime("%A").lower()}': True},
-            ).first()
-
-            if not next_schedule:
-                continue
-
-            # Проверяем, нет ли других приемов в это время
-            has_other_appointments = WaitingList.objects.filter(
-                doctor_schedule__doctor=doctor,
-                time_begin__lt=end_time
-                + timedelta(minutes=10),  # Уменьшаем до 10 минут
-                time_end__gt=end_time,
-            ).exists()
-
-            if has_other_appointments:
-                continue
-
-            # Проверяем, что есть достаточный перерыв между приемами
-            previous_appointment = (
-                WaitingList.objects.filter(
-                    doctor_schedule__doctor=doctor,
-                    time_end__lte=end_time,
-                )
+        # 6. Обрабатываем записи
+        for doctor in working_doctors:
+            last_appointment = (
+                current_queue.filter(doctor_schedule=doctor)
                 .order_by("-time_end")
                 .first()
             )
 
-            if previous_appointment and (
-                end_time - previous_appointment.time_end
-            ) < timedelta(minutes=2):
-                continue
+            for appointment in uncompleted_appointments:
+                if (
+                    appointment.specialization_id
+                    == doctor.doctor.specialization_id
+                ):
+                    if doctor.appointment_count == 0:
+                        # Свободный врач - добавляем сразу
+                        WaitingList.objects.create(
+                            ticket=appointment.ticket,
+                            doctor_schedule=doctor,
+                            time_begin=now,
+                            time_end=now + timedelta(minutes=11),
+                        )
+                        return
+                    # в противном случае подбираем время для добавления
+                    new_start = (
+                        last_appointment.time_end if last_appointment else now
+                    )
+                    new_start = max(new_start, now)
 
-            # Ищем подходящий незавершенный прием для этой специализации
-            suitable_appointment = uncompleted_appointments.filter(
-                specialization=doctor.specialization,
-            ).first()  # Уже отсортировано по ticket__created_at
-
-            if suitable_appointment:
-                WaitingList.objects.create(
-                    ticket=suitable_appointment.ticket,
-                    doctor_schedule=next_schedule,
-                    time_begin=end_time,
-                    time_end=end_time + timedelta(minutes=10),
-                )
-                return  # Выходим после первого успешного назначения
+                    work_end = doctor.schedule.datetime_end
+                    if (work_end - new_start) >= timedelta(minutes=11):
+                        WaitingList.objects.create(
+                            ticket=appointment.ticket,
+                            doctor_schedule=doctor,
+                            time_begin=new_start,
+                            time_end=new_start + timedelta(minutes=11),
+                        )
+                        return
+        return
 
 
 def assign_to_available_doctor(appointments, doctors, now):
@@ -190,7 +162,7 @@ def assign_to_available_doctor(appointments, doctors, now):
                 ticket=appointment.ticket,
                 doctor_schedule=doctor_schedule,
                 time_begin=now,
-                time_end=now + timedelta(minutes=10),
+                time_end=now + timedelta(minutes=11),
             )
             break
 

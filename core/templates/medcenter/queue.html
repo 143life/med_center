@@ -9,6 +9,31 @@
     </div>
 </div>
 
+<style>
+    .current-appointment {
+        background-color: #d4edda !important;
+        border-color: #c3e6cb !important;
+    }
+    .waiting-appointment {
+        background-color: #fff3cd !important;
+        border-color: #ffeeba !important;
+    }
+    .status-badge {
+        font-size: 0.8em;
+        padding: 0.25em 0.6em;
+        border-radius: 0.25rem;
+        margin-left: 0.5rem;
+    }
+    .status-current {
+        background-color: #28a745;
+        color: white;
+    }
+    .status-waiting {
+        background-color: #ffc107;
+        color: black;
+    }
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const queueContainer = document.getElementById('queue-container');
@@ -33,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
             queueContainer.innerHTML = '<div class="alert alert-warning">В настоящее время очередь пуста</div>';
             return;
         }
-        
+
         let html = '<div class="list-group">';
         
         queue.forEach(item => {
@@ -42,20 +67,23 @@ document.addEventListener('DOMContentLoaded', function() {
             const cabinetNumber = `${item.doctor_schedule__cabinet_number}`;
             const timeBegin = new Date(item.time_begin).toLocaleTimeString();
             const timeEnd = new Date(item.time_end).toLocaleTimeString();
+            const status = item.status;
+            const statusText = status === 'current' ? 'На приёме' : 'Ожидает';
             
             html += `
-            <div class="list-group-item">
+            <div class="list-group-item ${status}-appointment">
                 <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">${ticketNumber}</h5>
+                    <h5 class="mb-1">
+                        Талон №${ticketNumber}
+                        <span class="status-badge status-${status}">${statusText}</span>
+                    </h5>
                     <small>${timeBegin} - ${timeEnd}</small>
                 </div>
-                <small>Кабинет: ${item.doctor_schedule__cabinet_number}</small>
+                <small>Кабинет: ${cabinetNumber}</small>
             </div>
             `;
         });
         
-		//<p class="mb-1">Врач: ${doctor}</p>
-
         html += '</div>';
         queueContainer.innerHTML = html;
     }
