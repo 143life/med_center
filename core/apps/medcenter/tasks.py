@@ -1,4 +1,3 @@
-from collections import defaultdict
 from datetime import timedelta
 
 from django.db import transaction
@@ -37,8 +36,6 @@ def auto_complete_appointments_and_delete_from_waiting_list(
             "doctor_schedule__doctor__specialization_id",
             flat=True,
         ).distinct()
-
-        # TODO: обновлять заодно и талоны, если все приемы завершены
 
         # 3. Обновляем связанные Appointment
         updated_appointments = Appointment.objects.filter(
@@ -143,28 +140,6 @@ def auto_update_to_waiting_list(self, *args, **kwargs):
                         )
                         return
         return
-
-
-def assign_to_available_doctor(appointments, doctors, now):
-    """Назначает первый подходящий прием свободному врачу"""
-    # Группируем врачей по специализациям
-    spec_map = defaultdict(list)
-    for doc in doctors:
-        spec_map[doc.doctor.specialization_id].append(doc)
-
-    # Ищем первый подходящий прием
-    for appointment in appointments.order_by("ticket__created_at"):
-        if appointment.specialization_id in spec_map:
-            # Берем первого свободного врача нужной специализации
-            doctor_schedule = spec_map[appointment.specialization_id][0]
-
-            WaitingList.objects.create(
-                ticket=appointment.ticket,
-                doctor_schedule=doctor_schedule,
-                time_begin=now,
-                time_end=now + timedelta(minutes=11),
-            )
-            break
 
 
 @app.task(bind=True)
