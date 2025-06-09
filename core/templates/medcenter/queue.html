@@ -4,7 +4,11 @@
 {% block content %}
 <div class="container">
     <h1 class="text-center mb-4">Текущая очередь</h1>
-    <div id="queue-container">
+    <div 
+        id="queue-container" 
+        data-progress-url-template="{% url 'medcenter:ticket_progress' 0 %}"
+        data-is-admin="{% if request.user.is_authenticated and request.user.is_staff %}true{% else %}false{% endif %}"
+    >
         <div class="alert alert-info">Загрузка данных очереди...</div>
     </div>
 </div>
@@ -56,24 +60,23 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const queueContainer = document.getElementById('queue-container');
+    const urlTemplate = queueContainer.dataset.progressUrlTemplate;
+    // --- Самый надежный способ получить флаг админа ---
+    const isAdmin = queueContainer.dataset.isAdmin === 'true';
     
-    // Подключаемся к WebSocket
     const socket = new WebSocket(
         'ws://' + window.location.host + '/ws/queue/'
     );
 
-    // Обработчик входящих сообщений
     socket.onmessage = function(e) {
         const data = JSON.parse(e.data);
-        
         if (data.type === 'queue_update' || data.type === 'queue.update') {
             renderQueue(data.queue);
         }
     };
 
-    // Функция для отображения очереди
     function renderQueue(queue) {
-        if (queue.length === 0) {
+        if (!queue || queue.length === 0) {
             queueContainer.innerHTML = '<div class="alert alert-warning">В настоящее время очередь пуста</div>';
             return;
         }
@@ -81,15 +84,16 @@ document.addEventListener('DOMContentLoaded', function() {
         let html = '<div class="list-group">';
         
         queue.forEach(item => {
-            const ticketNumber = `${item.ticket__number}`;
-            const doctor = `${item.doctor_schedule__doctor__specialization__title}`;
-            const cabinetNumber = `${item.doctor_schedule__cabinet_number}`;
-            const timeBegin = new Date(item.time_begin).toLocaleTimeString();
-            const timeEnd = new Date(item.time_end).toLocaleTimeString();
-            const status = item.status;
+            const ticketId = item.ticket_id;
+            const ticketNumber = item.ticket__number || 'N/A';
+            const specialization = item.specialization__title || 'Специалист';
+            const cabinetNumber = item.doctor_schedule__cabinet_number || '?';
+            const timeBegin = item.time_begin ? new Date(item.time_begin).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--';
+            const timeEnd = item.time_end ? new Date(item.time_end).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--';
+            const status = item.status || 'waiting';
             const statusText = status === 'current' ? 'На приёме' : 'Ожидает';
             
-            html += `
+            const cardHtml = `
             <div class="list-group-item ${status}-appointment">
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">
@@ -98,21 +102,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     </h5>
                     <small>${timeBegin} - ${timeEnd}</small>
                 </div>
-                <small>Кабинет: ${cabinetNumber}</small>
+                <small>${specialization} - Кабинет: ${cabinetNumber}</small>
             </div>
             `;
+
+            if (isAdmin && ticketId) {
+                const progressUrl = urlTemplate.replace('0', ticketId);
+                html += `<a href="${progressUrl}" class="text-decoration-none">${cardHtml}</a>`;
+            } else {
+                html += cardHtml;
+            }
         });
         
         html += '</div>';
         queueContainer.innerHTML = html;
     }
 
-    // Обработчик ошибок
     socket.onclose = function(e) {
         console.error('WebSocket закрыт, переключаемся на polling');
         queueContainer.innerHTML = '<div class="alert alert-warning">Соединение прервано. Обновление данных каждые 10 секунд.</div>';
         
-        // Фоллбек на polling
         function fetchQueue() {
             fetch('/api/queue/')
                 .then(response => response.json())

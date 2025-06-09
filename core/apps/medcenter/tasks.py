@@ -21,33 +21,30 @@ def auto_complete_appointments_and_delete_from_waiting_list(
     **kwargs,
 ):
     with transaction.atomic():
-        # 1. Находим просроченные записи в очереди с незавершенными талонами
+        # 1. Находим просроченные записи в очереди
         expired_waiting = WaitingList.objects.filter(
             time_end__lte=timezone.now(),
-            ticket__completed=False,  # Проверяем статус в Ticket
+            ticket__completed=False,
         ).select_related("ticket", "doctor_schedule__doctor__specialization")
 
         if not expired_waiting.exists():
             return {"updated_appointments": 0, "deleted_waitings": 0}
 
-        # 2. Получаем ID талонов для массового обновления
+        # 2. Получаем ID для обновления связанных Appointment
         ticket_ids = expired_waiting.values_list("ticket_id", flat=True)
         specialization_ids = expired_waiting.values_list(
             "doctor_schedule__doctor__specialization_id",
             flat=True,
         ).distinct()
 
-        # 3. Обновляем связанные Appointment
         updated_appointments = Appointment.objects.filter(
             ticket_id__in=ticket_ids,
             specialization_id__in=specialization_ids,
             completed=False,
-        ).update(completed=True)
+        ).update(completed=True, updated_at=timezone.now())
 
-        # 4. Удаляем все завершенные приемы из очереди
-        deleted_waitings, _ = WaitingList.objects.filter(
-            ticket_id__in=ticket_ids,
-        ).delete()
+        # 4. Удаляем только просроченные записи из очереди
+        deleted_waitings, _ = expired_waiting.delete()
 
         return {
             "updated_appointments": updated_appointments,

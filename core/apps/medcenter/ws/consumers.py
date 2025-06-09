@@ -18,19 +18,25 @@ class QueueConsumer(AsyncWebsocketConsumer):
     def get_current_queue(self):
         WaitingList = apps.get_model("medcenter", "WaitingList")
         now = timezone.now()
-        queue = (
-            WaitingList.objects.filter()
+
+        # 1. Запрашиваем из БД ТОЛЬКО АКТУАЛЬНЫЕ записи (еще не закончились)
+        # Это решает проблему "пропадания" приемов.
+        queue_from_db = (
+            WaitingList.objects.filter(time_end__gt=now)
             .select_related(
                 "ticket",
-                "doctor_schedule",
+                "doctor_schedule__doctor__specialization",
             )
             .order_by("time_begin")
         )
 
-        return [
+        # 2. Вычисляем статус в Python, как и в вашем оригинальном коде.
+        queue_data = [
             {
+                "ticket_id": item.ticket.id,
                 "ticket__number": item.ticket.number,
                 "doctor_schedule__cabinet_number": item.doctor_schedule.cabinet_number,  # noqa
+                "specialization__title": item.doctor_schedule.doctor.specialization.title,  # noqa
                 "time_begin": item.time_begin.isoformat(),
                 "time_end": item.time_end.isoformat(),
                 "status": (
@@ -39,8 +45,16 @@ class QueueConsumer(AsyncWebsocketConsumer):
                     else "waiting"
                 ),
             }
-            for item in queue
+            for item in queue_from_db
         ]
+
+        # 3. Сортируем готовый список в Python: сначала "current"
+        # Это решает проблему с порядком отображения.
+        queue_data.sort(
+            key=lambda x: (x["status"] != "current", x["time_begin"]),
+        )
+
+        return queue_data
 
     async def send_current_queue(self):
         queue = await self.get_current_queue()
@@ -49,7 +63,11 @@ class QueueConsumer(AsyncWebsocketConsumer):
         )
 
     async def queue_update(self, event):
-        await self.send(text_data=json.dumps(event))
+        # Вместо того чтобы доверять данным в event,
+        # мы просто используем его как триггер для пересчета очереди.
+        # Это гарантирует, что все клиенты получат одинаковые,
+        # правильно отсортированные данные.
+        await self.send_current_queue()
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(

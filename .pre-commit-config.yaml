@@ -31,29 +31,10 @@ repos:
         --remove-unused-variables,
       ]
 
-#  - repo: https://github.com/psf/black-pre-commit-mirror
-#    rev: 25.1.0
-#    hooks:
-#      - id: black
-#        language_version: python3.12
-#        args: ['-S']
-
   - repo: https://github.com/pycqa/isort
     rev: 6.0.1
     hooks:
       - id: isort
-  
-
-  #- repo: https://github.com/PyCQA/docformatter
-  #  rev: v1.7.5  # Проверьте актуальную версию
-  #  hooks:
-  #    - id: docformatter
-  #      language: python
-  #      args: [
-  #        --in-place,       # Автоматически исправлять
-  #        --wrap-summaries=88,  # Совместимость с Black
-  #        --blank,
-  #      ]
   
   - repo: https://github.com/pycqa/flake8
     rev: 7.2.0
@@ -66,14 +47,3 @@ repos:
           - flake8-comprehensions>=3.14.0
           - flake8-eradicate>=1.5.0
           - dlint>=0.11.0
-
-#  - repo: https://github.com/pre-commit/mirrors-autopep8
-#    rev: v2.0.4
-#    hooks:
-#      - id: autopep8
-#        args: [
-#          --in-place,
-#          --aggressive,
-#          --max-line-length=88,
-#          --recursive,
-#          ]

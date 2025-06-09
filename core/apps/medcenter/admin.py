@@ -2,6 +2,8 @@ from django import forms
 from django.conf import settings
 from django.contrib import admin
 from django.db import transaction
+from django.urls import reverse
+from django.utils.html import format_html
 
 import requests
 
@@ -129,23 +131,27 @@ class TicketAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Получаем доступные специальности через API
-        # URL API из настроек
-        api_url = f"{settings.API_BASE_URL}medcenter/specialization/all"
+        instance = kwargs.get("instance")
 
-        try:
-            response = requests.get(
-                api_url,
-                timeout=3,  # Таймаут 3 секунды
-                headers={"Accept": "application/json"},
-            )
-            if response.status_code == 200:
-                specialties = response.json().get("data", [])
-                self.fields["available_specialities"].choices = [
-                    (spec["id"], spec["title"]) for spec in specialties
-                ]
-        except requests.exceptions.RequestException as e:
-            print(f"API request failed: {e}")
+        # Заполняем специальности, только если это новый талон
+        if not (instance and instance.pk):
+            # Получаем доступные специальности через API
+            api_url = f"{settings.API_BASE_URL}medcenter/specialization/all"
+
+            try:
+                response = requests.get(
+                    api_url,
+                    timeout=3,  # Таймаут 3 секунды
+                    headers={"Accept": "application/json"},
+                )
+                if response.status_code == 200:
+                    specialties = response.json().get("data", [])
+                    if "available_specialities" in self.fields:
+                        self.fields["available_specialities"].choices = [
+                            (spec["id"], spec["title"]) for spec in specialties
+                        ]
+            except requests.exceptions.RequestException as e:
+                print(f"API request failed: {e}")
 
 
 @admin.register(Ticket)
@@ -156,6 +162,36 @@ class TicketAdmin(admin.ModelAdmin):
     search_fields = ("number", "person__last_name", "person__first_name")
     date_hierarchy = "datetime"
     raw_id_fields = ("person",)
+    readonly_fields = ("ticket_progress_link",)
+
+    def ticket_progress_link(self, obj):
+        if obj.pk:
+            url = reverse("medcenter:ticket_progress", args=[obj.pk])
+            return format_html(
+                '<a href="{}" class="button">Отследить процесс</a>',
+                url,
+            )
+        return "Сохраните талон, чтобы отследить процесс"
+
+    ticket_progress_link.short_description = "Процесс"
+
+    def get_fieldsets(self, request, obj=None):
+        if obj:  # Страница редактирования существующего талона
+            return (
+                ("Отслеживание", {"fields": ("ticket_progress_link",)}),
+                (
+                    "Основная информация",
+                    {"fields": ("person", "datetime", "number", "completed")},
+                ),
+            )
+        # Страница создания нового талона
+        return (
+            (
+                "Основная информация",
+                {"fields": ("person", "datetime", "number", "completed")},
+            ),
+            ("Назначить приёмы", {"fields": ("available_specialities",)}),
+        )
 
     def save_model(self, request, obj, form, change):
         with transaction.atomic():
